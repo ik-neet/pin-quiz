@@ -1,0 +1,9 @@
+{
+  "name": "pin-quiz",
+  "version": "1.0.0",
+  "description": "日本の市町村ピン刺しゲーム",
+  "scripts": {
+    "fetch-coords": "node scripts/fetch-coordinates.js",
+    "fetch-borders": "node scripts/fetch-municipality-borders.js"
+  }
+}

@@ -1,0 +1,397 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Noto Sans JP', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a2e;
+}
+
+/* ─── Start Screen ─── */
+#start-screen {
+  position: fixed;
+  inset: 0;
+  background: #1a1a2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#start-screen.hidden { display: none; }
+
+#start-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 48px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  max-width: 400px;
+  width: 90%;
+}
+
+#start-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1a1a2e;
+  line-height: 1.4;
+  margin-bottom: 28px;
+  letter-spacing: 1px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.setting-row label {
+  font-size: 13px;
+  color: #444;
+  min-width: 88px;
+  font-weight: 500;
+}
+
+.setting-row input[type="number"] {
+  width: 64px;
+  padding: 6px 8px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+}
+
+.setting-row input[type="number"]:focus { border-color: #1a1a2e; }
+
+.setting-row select {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+
+.setting-row select:focus { border-color: #1a1a2e; }
+
+.setting-unit {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+}
+
+#start-btn {
+  margin-top: 28px;
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  padding: 14px 0;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s, transform 0.1s, opacity 0.2s;
+}
+
+#start-btn:hover:not(:disabled) { background: #2d2d5e; }
+#start-btn:active:not(:disabled) { transform: scale(0.97); }
+#start-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Header ─── */
+#header {
+  background: #1a1a2e;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #2d2d5e;
+}
+
+#round-info {
+  font-size: 13px;
+  color: #aaa;
+  min-width: 90px;
+}
+
+#logo {
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+#score-display {
+  font-size: 13px;
+  color: #ffd700;
+  font-weight: bold;
+  min-width: 90px;
+  text-align: right;
+}
+
+#score-display span {
+  font-size: 20px;
+}
+
+/* ─── Question Banner ─── */
+#question-banner {
+  background: white;
+  text-align: center;
+  padding: 14px 16px 10px;
+  flex-shrink: 0;
+  border-bottom: 3px solid #e8e8e8;
+}
+
+#municipality-name {
+  display: block;
+  font-size: 30px;
+  font-weight: bold;
+  color: #1a1a2e;
+  letter-spacing: 3px;
+}
+
+#prefecture-hint {
+  display: block;
+  font-size: 13px;
+  color: #888;
+  margin-top: 3px;
+}
+
+#timer {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  color: #1a1a2e;
+  margin-top: 4px;
+  min-height: 18px;
+}
+
+#timer[data-urgent="true"] {
+  color: #e74c3c;
+  animation: timerPulse 0.6s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ─── Map Container ─── */
+#map-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* ─── Instruction Bar ─── */
+#instruction {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(26, 26, 46, 0.88);
+  color: #ddd;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 13px;
+  z-index: 900;
+  pointer-events: none;
+}
+
+/* ─── Result Panel ─── */
+#result-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 3px solid #1a1a2e;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 1000;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25);
+  transform: translateY(0);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#result-panel.hidden {
+  transform: translateY(110%);
+}
+
+#result-left {
+  flex: 1;
+}
+
+#result-distance {
+  font-size: 20px;
+  font-weight: bold;
+  color: #222;
+}
+
+#result-guess {
+  font-size: 13px;
+  color: #444;
+  margin-top: 4px;
+}
+
+#result-label {
+  font-size: 13px;
+  color: #666;
+  margin-top: 2px;
+}
+
+#result-points-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  min-width: 80px;
+  justify-content: center;
+}
+
+#result-points {
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+#result-points-unit {
+  font-size: 16px;
+  color: #666;
+}
+
+#result-points[data-level="high"]  { color: #27ae60; }
+#result-points[data-level="mid"]   { color: #e67e22; }
+#result-points[data-level="low"]   { color: #e74c3c; }
+#result-points[data-level="zero"]  { color: #aaa; }
+
+#next-btn {
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#next-btn:hover  { background: #2d2d5e; }
+#next-btn:active { transform: scale(0.97); }
+
+/* ─── Game Over Overlay ─── */
+#game-over {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(2px);
+}
+
+#game-over.hidden { display: none; }
+
+#game-over-card {
+  background: white;
+  border-radius: 20px;
+  padding: 44px 60px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  max-width: 360px;
+  width: 90%;
+}
+
+#final-msg {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+}
+
+#final-score {
+  font-size: 52px;
+  font-weight: bold;
+  color: #27ae60;
+  line-height: 1;
+}
+
+#final-pct {
+  font-size: 15px;
+  color: #888;
+  margin-top: 6px;
+  margin-bottom: 28px;
+}
+
+#restart-btn {
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#restart-btn:hover  { background: #2d2d5e; }
+#restart-btn:active { transform: scale(0.97); }
+
+/* ─── Confirm Button ─── */
+#confirm-btn {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 950;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: background 0.2s, transform 0.1s, opacity 0.2s;
+  white-space: nowrap;
+}
+
+#confirm-btn:hover  { background: #c0392b; }
+#confirm-btn:active { transform: translateX(-50%) scale(0.97); }
+
+#confirm-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── Custom Map Markers ─── */
+.pin-guess,
+.pin-answer {
+  width: 22px;
+  height: 22px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.pin-guess  { background: #e74c3c; }
+.pin-answer { background: #27ae60; }
