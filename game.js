@@ -547,7 +547,8 @@ function findMunicipalityAt(lng, lat) {
   }
   for (const [name, feature] of Object.entries(boundaryIndex)) {
     if (pointInFeature([lng, lat], feature)) {
-      return name;
+      const prefecture = feature.properties.NL_NAME_1 || feature.properties.NAME_1 || '';
+      return prefecture ? `${prefecture} ${name}` : name;
     }
   }
   return null;
