@@ -21,6 +21,28 @@ let timerInterval = null, timeLeft = 0;
 
 const el = id => document.getElementById(id);
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatMunicipalityName(name, kana) {
+  const safeName = escapeHtml(name);
+  const safeKana = escapeHtml(kana);
+  if (!safeKana) {
+    return safeName;
+  }
+  return `<span class="name-stack"><span class="name-main">${safeName}</span><span class="name-ruby">${safeKana}</span></span>`;
+}
+
+function formatAnswerLabel(prefecture, name, kana) {
+  return `正解：${escapeHtml(prefecture)} ${formatMunicipalityName(name, kana)}`;
+}
+
 function init() {
   initMap();
   loadBoundaryData();
@@ -170,7 +192,7 @@ function startRound() {
   guessMarker = answerMarker = connLine = highlightLayer = null;
 
   el('current-round').textContent = round;
-  el('municipality-name').textContent = current.name;
+  el('municipality-name').innerHTML = formatMunicipalityName(current.name, current.nameKana);
 
   const alwaysShow = settings.showPrefecture === 'always';
   el('prefecture-hint').textContent = (alwaysShow || duplicateNames.has(current.name)) ? current.prefecture : '';
@@ -276,7 +298,7 @@ function revealResult(guessLat, guessLng) {
 
   answerMarker = L.marker([current.lat, current.lng], { icon: pinIcon('pin-answer') })
     .addTo(map)
-    .bindPopup(`<b>${current.prefecture}</b><br>${current.name}`)
+    .bindPopup(`<b>${escapeHtml(current.prefecture)}</b><br>${formatMunicipalityName(current.name, current.nameKana)}`)
     .openPopup();
 
   if (!isTimeout && !inBoundary) {
@@ -306,7 +328,7 @@ function revealResult(guessLat, guessLng) {
     el('result-distance').textContent = `距離：${distLabel}`;
   }
 
-  el('result-label').textContent = `正解：${current.prefecture} ${current.name}`;
+  el('result-label').innerHTML = formatAnswerLabel(current.prefecture, current.name, current.nameKana);
   el('result-points').textContent = `+${pts}`;
   el('result-points').dataset.level = pts >= 8 ? 'high' : pts >= 5 ? 'mid' : pts >= 1 ? 'low' : 'zero';
 
@@ -315,7 +337,7 @@ function revealResult(guessLat, guessLng) {
   el('next-btn').onclick = isLast ? showGameOver : startRound;
 
   el('result-panel').classList.remove('hidden');
-  el('instruction').textContent = `正解：${current.prefecture} ${current.name}`;
+  el('instruction').innerHTML = formatAnswerLabel(current.prefecture, current.name, current.nameKana);
 }
 
 function showGameOver() {

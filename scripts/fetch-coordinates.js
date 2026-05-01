@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DATASET = path.join(__dirname, '../../cities_quiz/data/wikipedia/normalized/municipality-dataset.json');
+const RAW_MUNICIPALITIES_DIR = path.join(__dirname, '../../cities_quiz/data/municipalities/raw');
 const OUTPUT = path.join(__dirname, '../data/municipalities.json');
 const BATCH = 50;
 const DELAY = 150;
@@ -26,6 +27,36 @@ function httpGet(url, headers = {}) {
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function toHiragana(text) {
+  return String(text || '').replace(/[\u30a1-\u30f6]/g, char =>
+    String.fromCharCode(char.charCodeAt(0) - 0x60)
+  );
+}
+
+function loadKanaByCode() {
+  if (!fs.existsSync(RAW_MUNICIPALITIES_DIR)) {
+    return new Map();
+  }
+
+  const candidates = fs.readdirSync(RAW_MUNICIPALITIES_DIR)
+    .filter(name => /^\d{4}-\d{2}-\d{2}\.json$/.test(name))
+    .sort()
+    .reverse();
+
+  if (!candidates.length) {
+    return new Map();
+  }
+
+  const latestPath = path.join(RAW_MUNICIPALITIES_DIR, candidates[0]);
+  const raw = JSON.parse(fs.readFileSync(latestPath, 'utf-8'));
+  const items = raw.items || [];
+
+  return new Map(items.map(item => [
+    item.rawCode,
+    toHiragana(item.rawKana || ''),
+  ]));
+}
 
 // Step 1: Wikipedia titles → Wikidata QIDs (prop=pageprops)
 async function fetchQids(titles) {
@@ -83,6 +114,7 @@ async function main() {
 
   const raw = JSON.parse(fs.readFileSync(DATASET, 'utf-8'));
   const items = raw.items || raw;
+  const kanaByCode = loadKanaByCode();
   console.log(`市町村数: ${items.length}`);
 
   // Step 1: get all QIDs
@@ -124,6 +156,7 @@ async function main() {
       results.push({
         code: m.municipalityCode,
         name: m.municipalityName,
+        nameKana: kanaByCode.get(m.municipalityCode) || null,
         prefecture: m.prefectureName,
         lat: coords.lat,
         lng: coords.lng,
