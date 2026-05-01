@@ -4,111 +4,165 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-deep: #1a1a2e;
+  --bg-accent: #28345f;
+  --panel: #ffffff;
+  --panel-soft: #f5f7fb;
+  --line: #d7ddea;
+  --text-main: #1a1a2e;
+  --text-sub: #62708a;
+  --gold: #ffd700;
+  --danger: #e74c3c;
+  --danger-deep: #c0392b;
+  --success: #27ae60;
+}
+
 body {
   font-family: 'Segoe UI', 'Noto Sans JP', sans-serif;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #1a1a2e;
+  background:
+    radial-gradient(circle at top, rgba(94, 129, 244, 0.2), transparent 32%),
+    linear-gradient(180deg, #11172d 0%, var(--bg-deep) 52%, #101624 100%);
 }
 
-/* ─── Start Screen ─── */
 #start-screen {
   position: fixed;
   inset: 0;
-  background: #1a1a2e;
+  background:
+    radial-gradient(circle at top, rgba(129, 156, 255, 0.16), transparent 28%),
+    linear-gradient(180deg, #11172d 0%, var(--bg-deep) 52%, #101624 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  padding: 24px;
 }
 
 #start-screen.hidden { display: none; }
 
 #start-card {
-  background: white;
-  border-radius: 20px;
-  padding: 40px 48px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(244, 247, 252, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 28px;
+  padding: 34px 32px 30px;
   text-align: center;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-  max-width: 400px;
-  width: 90%;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+  max-width: 480px;
+  width: min(100%, 480px);
+  backdrop-filter: blur(14px);
+}
+
+#start-title-wrap {
+  margin-bottom: 24px;
+}
+
+#start-title-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(40, 52, 95, 0.09);
+  color: var(--bg-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin-bottom: 14px;
 }
 
 #start-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1a1a2e;
-  line-height: 1.4;
-  margin-bottom: 28px;
-  letter-spacing: 1px;
+  font-size: clamp(21px, 4vw, 32px);
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+#start-subtitle {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.6;
 }
 
 .setting-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
   text-align: left;
 }
 
 .setting-row label {
   font-size: 13px;
-  color: #444;
-  min-width: 88px;
-  font-weight: 500;
+  color: #33415c;
+  min-width: 96px;
+  font-weight: 700;
 }
 
 .setting-row input[type="number"] {
-  width: 64px;
-  padding: 6px 8px;
-  border: 1.5px solid #ccc;
-  border-radius: 6px;
+  width: 72px;
+  padding: 8px 10px;
+  border: 1.5px solid #c7d0df;
+  border-radius: 10px;
   font-size: 14px;
   text-align: center;
   outline: none;
+  background: var(--panel-soft);
 }
 
-.setting-row input[type="number"]:focus { border-color: #1a1a2e; }
+.setting-row input[type="number"]:focus,
+.setting-row select:focus {
+  border-color: var(--bg-accent);
+  box-shadow: 0 0 0 3px rgba(40, 52, 95, 0.08);
+}
 
 .setting-row select {
   flex: 1;
-  padding: 6px 8px;
-  border: 1.5px solid #ccc;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border: 1.5px solid #c7d0df;
+  border-radius: 10px;
   font-size: 13px;
   outline: none;
+  background: var(--panel-soft);
 }
-
-.setting-row select:focus { border-color: #1a1a2e; }
 
 .setting-unit {
   font-size: 12px;
-  color: #888;
+  color: #7a859b;
   white-space: nowrap;
 }
 
+.setting-row-toggle select {
+  max-width: 120px;
+}
+
 #start-btn {
-  margin-top: 28px;
-  background: #1a1a2e;
+  margin-top: 20px;
+  background: linear-gradient(135deg, var(--bg-accent) 0%, var(--bg-deep) 100%);
   color: white;
   border: none;
-  padding: 14px 0;
-  border-radius: 10px;
+  padding: 15px 0;
+  border-radius: 14px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
   width: 100%;
   transition: background 0.2s, transform 0.1s, opacity 0.2s;
 }
 
-#start-btn:hover:not(:disabled) { background: #2d2d5e; }
-#start-btn:active:not(:disabled) { transform: scale(0.97); }
-#start-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+#start-btn:hover:not(:disabled) { filter: brightness(1.06); }
+#start-btn:active:not(:disabled) { transform: scale(0.98); }
+#start-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* ─── Header ─── */
 #header {
-  background: #1a1a2e;
+  background: var(--bg-deep);
   color: white;
   display: flex;
   justify-content: space-between;
@@ -120,20 +174,20 @@ body {
 
 #round-info {
   font-size: 13px;
-  color: #aaa;
+  color: #b7c0d4;
   min-width: 90px;
 }
 
 #logo {
   font-size: 15px;
-  font-weight: bold;
-  letter-spacing: 1px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 #score-display {
   font-size: 13px;
-  color: #ffd700;
-  font-weight: bold;
+  color: var(--gold);
+  font-weight: 700;
   min-width: 90px;
   text-align: right;
 }
@@ -142,7 +196,6 @@ body {
   font-size: 20px;
 }
 
-/* ─── Question Banner ─── */
 #question-banner {
   background: white;
   text-align: center;
@@ -154,9 +207,9 @@ body {
 #municipality-name {
   display: block;
   font-size: 30px;
-  font-weight: bold;
-  color: #1a1a2e;
-  letter-spacing: 3px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 0.08em;
 }
 
 .name-stack {
@@ -189,14 +242,14 @@ body {
 #timer {
   display: block;
   font-size: 13px;
-  font-weight: bold;
-  color: #1a1a2e;
+  font-weight: 700;
+  color: var(--text-main);
   margin-top: 4px;
   min-height: 18px;
 }
 
 #timer[data-urgent="true"] {
-  color: #e74c3c;
+  color: var(--danger);
   animation: timerPulse 0.6s ease-in-out infinite;
 }
 
@@ -205,7 +258,6 @@ body {
   50% { opacity: 0.35; }
 }
 
-/* ─── Map Container ─── */
 #map-container {
   flex: 1;
   position: relative;
@@ -217,7 +269,6 @@ body {
   height: 100%;
 }
 
-/* ─── Instruction Bar ─── */
 #instruction {
   position: absolute;
   bottom: 0;
@@ -232,14 +283,13 @@ body {
   pointer-events: none;
 }
 
-/* ─── Result Panel ─── */
 #result-panel {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   background: white;
-  border-top: 3px solid #1a1a2e;
+  border-top: 3px solid var(--bg-deep);
   padding: 14px 20px;
   display: flex;
   align-items: center;
@@ -260,7 +310,7 @@ body {
 
 #result-distance {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 700;
   color: #222;
 }
 
@@ -296,7 +346,7 @@ body {
 
 #result-points {
   font-size: 40px;
-  font-weight: bold;
+  font-weight: 800;
   line-height: 1;
 }
 
@@ -305,13 +355,13 @@ body {
   color: #666;
 }
 
-#result-points[data-level="high"]  { color: #27ae60; }
+#result-points[data-level="high"]  { color: var(--success); }
 #result-points[data-level="mid"]   { color: #e67e22; }
-#result-points[data-level="low"]   { color: #e74c3c; }
+#result-points[data-level="low"]   { color: var(--danger); }
 #result-points[data-level="zero"]  { color: #aaa; }
 
 #next-btn {
-  background: #1a1a2e;
+  background: var(--bg-deep);
   color: white;
   border: none;
   padding: 12px 22px;
@@ -325,7 +375,6 @@ body {
 #next-btn:hover  { background: #2d2d5e; }
 #next-btn:active { transform: scale(0.97); }
 
-/* ─── Game Over Overlay ─── */
 #game-over {
   position: absolute;
   inset: 0;
@@ -351,15 +400,15 @@ body {
 
 #final-msg {
   font-size: 28px;
-  font-weight: bold;
-  color: #1a1a2e;
+  font-weight: 700;
+  color: var(--text-main);
   margin-bottom: 20px;
 }
 
 #final-score {
   font-size: 52px;
-  font-weight: bold;
-  color: #27ae60;
+  font-weight: 800;
+  color: var(--success);
   line-height: 1;
 }
 
@@ -371,7 +420,7 @@ body {
 }
 
 #restart-btn {
-  background: #1a1a2e;
+  background: var(--bg-deep);
   color: white;
   border: none;
   padding: 14px 36px;
@@ -384,19 +433,18 @@ body {
 #restart-btn:hover  { background: #2d2d5e; }
 #restart-btn:active { transform: scale(0.97); }
 
-/* ─── Confirm Button ─── */
 #confirm-btn {
   position: absolute;
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  background: #e74c3c;
+  background: var(--danger);
   color: white;
   border: none;
   padding: 14px 36px;
   border-radius: 10px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
   z-index: 950;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -404,7 +452,7 @@ body {
   white-space: nowrap;
 }
 
-#confirm-btn:hover  { background: #c0392b; }
+#confirm-btn:hover  { background: var(--danger-deep); }
 #confirm-btn:active { transform: translateX(-50%) scale(0.97); }
 
 #confirm-btn.hidden {
@@ -412,7 +460,6 @@ body {
   pointer-events: none;
 }
 
-/* ─── Custom Map Markers ─── */
 .pin-guess,
 .pin-answer {
   width: 22px;
@@ -423,5 +470,63 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-.pin-guess  { background: #e74c3c; }
-.pin-answer { background: #27ae60; }
+.pin-guess  { background: var(--danger); }
+.pin-answer { background: var(--success); }
+
+@media (max-width: 640px) {
+  #start-screen {
+    padding: 16px;
+  }
+
+  #start-card {
+    padding: 28px 18px 24px;
+    border-radius: 22px;
+  }
+
+  #start-title {
+    font-size: clamp(16px, 5vw, 24px);
+    letter-spacing: 0.01em;
+  }
+
+  #start-subtitle {
+    font-size: 12px;
+  }
+
+  .setting-row {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .setting-row label {
+    min-width: 82px;
+    font-size: 12px;
+  }
+
+  .setting-row select,
+  .setting-row input[type="number"] {
+    font-size: 12px;
+  }
+
+  #header {
+    padding: 10px 12px;
+  }
+
+  #logo {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  #municipality-name {
+    font-size: 24px;
+    letter-spacing: 0.04em;
+  }
+
+  #result-panel {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  #result-points {
+    font-size: 34px;
+  }
+}

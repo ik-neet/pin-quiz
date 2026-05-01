@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>日本市区町村位置当てゲーム</title>
+  <title>日本市区町村 位置当てゲーム</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- ─── Start Screen ─── -->
   <div id="start-screen">
     <div id="start-card">
-      <div id="start-title">📍 日本市区町村<br>位置当てゲーム</div>
+      <div id="start-title-wrap">
+        <div id="start-title-badge">JAPAN MUNICIPALITY PIN QUIZ</div>
+        <h1 id="start-title">日本市区町村 位置当てゲーム</h1>
+        <p id="start-subtitle">地図をクリックして、全国の市区町村の位置感覚に挑戦。</p>
+      </div>
 
       <div class="setting-row">
         <label for="setting-rounds">問題数</label>
@@ -22,7 +25,7 @@
       <div class="setting-row">
         <label for="setting-prefecture">都道府県名</label>
         <select id="setting-prefecture">
-          <option value="auto">なし（重複市区町村のみ表示）</option>
+          <option value="auto">同名の市町村のみ表示</option>
           <option value="always">常に表示</option>
         </select>
       </div>
@@ -30,17 +33,24 @@
       <div class="setting-row">
         <label for="setting-timelimit">制限時間</label>
         <input type="number" id="setting-timelimit" value="0" min="0" max="300" step="5">
-        <span class="setting-unit">秒（0 = なし）</span>
+        <span class="setting-unit">秒 / 0 でなし</span>
+      </div>
+
+      <div class="setting-row setting-row-toggle">
+        <label for="setting-kana">ふりがな表示</label>
+        <select id="setting-kana">
+          <option value="on">ON</option>
+          <option value="off">OFF</option>
+        </select>
       </div>
 
       <button id="start-btn" disabled>読み込み中...</button>
     </div>
   </div>
 
-  <!-- ─── Game Screen ─── -->
   <div id="header">
     <div id="round-info">第 <span id="current-round">1</span> / <span id="total-rounds">5</span> 問</div>
-    <div id="logo">📍 位置当てゲーム</div>
+    <div id="logo">位置当てゲーム</div>
     <div id="score-display">スコア <span id="total-score">0</span></div>
   </div>
 
@@ -53,9 +63,9 @@
   <div id="map-container">
     <div id="map"></div>
 
-    <div id="instruction">地図をクリックしてピンを刺してください</div>
+    <div id="instruction">地図をクリックしてピンを置いてください</div>
 
-    <button id="confirm-btn" class="hidden">ここに決定！</button>
+    <button id="confirm-btn" class="hidden">ここに決定</button>
 
     <div id="result-panel" class="hidden">
       <div id="result-left">

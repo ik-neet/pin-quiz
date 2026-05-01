@@ -9,15 +9,29 @@ const SCORE_BREAKS = [
 
 let municipalities = [];
 let queue = [];
-let map, guessMarker, answerMarker, connLine;
-let round = 0, totalScore = 0, answered = false, current = null;
-let pendingLat = null, pendingLng = null;
+let map;
+let guessMarker;
+let answerMarker;
+let connLine;
+let round = 0;
+let totalScore = 0;
+let answered = false;
+let current = null;
+let pendingLat = null;
+let pendingLng = null;
 let boundaryIndex = null;
 let highlightLayer = null;
 let duplicateNames = new Set();
 
-let settings = { rounds: 5, showPrefecture: 'auto', timeLimit: 0 };
-let timerInterval = null, timeLeft = 0;
+let settings = {
+  rounds: 5,
+  showPrefecture: 'auto',
+  timeLimit: 0,
+  showKana: true,
+};
+
+let timerInterval = null;
+let timeLeft = 0;
 
 const el = id => document.getElementById(id);
 
@@ -30,17 +44,17 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function formatMunicipalityName(name, kana) {
+function formatMunicipalityName(name, kana, showKana = settings.showKana) {
   const safeName = escapeHtml(name);
   const safeKana = escapeHtml(kana);
-  if (!safeKana) {
+  if (!showKana || !safeKana) {
     return safeName;
   }
   return `<span class="name-stack"><span class="name-main">${safeName}</span><span class="name-ruby">${safeKana}</span></span>`;
 }
 
-function formatAnswerLabel(prefecture, name, kana) {
-  return `正解：${escapeHtml(prefecture)} ${formatMunicipalityName(name, kana)}`;
+function formatAnswerLabel(prefecture, name, kana, showKana = settings.showKana) {
+  return `正解: ${escapeHtml(prefecture)} ${formatMunicipalityName(name, kana, showKana)}`;
 }
 
 function init() {
@@ -48,14 +62,16 @@ function init() {
   loadBoundaryData();
 
   fetch('./data/municipalities.json')
-    .then(r => r.json())
+    .then(response => response.json())
     .then(data => {
       municipalities = data;
       const counts = {};
-      for (const m of municipalities) counts[m.name] = (counts[m.name] || 0) + 1;
-      duplicateNames = new Set(Object.keys(counts).filter(n => counts[n] > 1));
+      for (const municipality of municipalities) {
+        counts[municipality.name] = (counts[municipality.name] || 0) + 1;
+      }
+      duplicateNames = new Set(Object.keys(counts).filter(name => counts[name] > 1));
       el('start-btn').disabled = false;
-      el('start-btn').textContent = 'ゲームスタート →';
+      el('start-btn').textContent = 'ゲームスタート';
     })
     .catch(() => {
       el('start-btn').textContent = '読み込み失敗';
@@ -65,9 +81,10 @@ function init() {
 }
 
 function onStartGame() {
-  settings.rounds = Math.max(1, Math.min(50, parseInt(el('setting-rounds').value) || 5));
+  settings.rounds = Math.max(1, Math.min(50, parseInt(el('setting-rounds').value, 10) || 5));
   settings.showPrefecture = el('setting-prefecture').value;
-  settings.timeLimit = Math.max(0, parseInt(el('setting-timelimit').value) || 0);
+  settings.timeLimit = Math.max(0, parseInt(el('setting-timelimit').value, 10) || 0);
+  settings.showKana = el('setting-kana').value === 'on';
 
   el('start-screen').classList.add('hidden');
   startNewGame();
@@ -75,14 +92,16 @@ function onStartGame() {
 
 async function loadBoundaryData() {
   try {
-    const geojson = await fetch('./data/municipality-borders.geojson').then(r => r.json());
+    const geojson = await fetch('./data/municipality-borders.geojson').then(response => response.json());
     boundaryIndex = {};
-    for (const f of geojson.features) {
-      const name = f.properties.NL_NAME_2 || f.properties.NAME_2;
-      if (name) boundaryIndex[name] = f;
+    for (const feature of geojson.features) {
+      const name = feature.properties.NL_NAME_2 || feature.properties.NAME_2;
+      if (name) {
+        boundaryIndex[name] = feature;
+      }
     }
   } catch {
-    // 境界データなし → 距離スコアのみで動作
+    // 境界データがなくても距離ベースの採点で続行する。
   }
 }
 
@@ -120,40 +139,52 @@ function initMap() {
 
 async function addMunicipalityBorders() {
   try {
-    const geojson = await fetch('./data/municipality-borders.geojson').then(r => r.json());
+    const geojson = await fetch('./data/municipality-borders.geojson').then(response => response.json());
     L.geoJSON(geojson, {
-      style: { color: '#8899bb', weight: 0.5, opacity: 0.5, fillOpacity: 0, interactive: false },
+      style: {
+        color: '#8899bb',
+        weight: 0.5,
+        opacity: 0.5,
+        fillOpacity: 0,
+        interactive: false,
+      },
       pane: 'municipalityPane',
     }).addTo(map);
   } catch {
-    // 境界データなしの場合はそのまま続行
+    // 境界線なしでもプレイ可能。
   }
 }
 
 async function addPrefectureBorders() {
   try {
-    const geojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson').then(r => r.json());
+    const geojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson').then(response => response.json());
     L.geoJSON(geojson, {
-      style: { color: '#1a1a2e', weight: 1.2, opacity: 0.7, fillOpacity: 0, interactive: false },
+      style: {
+        color: '#1a1a2e',
+        weight: 1.2,
+        opacity: 0.7,
+        fillOpacity: 0,
+        interactive: false,
+      },
       pane: 'prefecturePane',
     }).addTo(map);
   } catch {
-    // 境界線取得失敗時はそのまま続行
+    // 都道府県境界の取得失敗時はそのまま続行する。
   }
 }
 
 async function addJapanMask() {
   try {
-    const geojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson').then(r => r.json());
-
+    const geojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson').then(response => response.json());
     const japanRings = [];
+
     for (const feature of geojson.features) {
-      const geom = feature.geometry;
-      if (geom.type === 'Polygon') {
-        japanRings.push(geom.coordinates[0].slice().reverse());
-      } else if (geom.type === 'MultiPolygon') {
-        for (const poly of geom.coordinates) {
-          japanRings.push(poly[0].slice().reverse());
+      const geometry = feature.geometry;
+      if (geometry.type === 'Polygon') {
+        japanRings.push(geometry.coordinates[0].slice().reverse());
+      } else if (geometry.type === 'MultiPolygon') {
+        for (const polygon of geometry.coordinates) {
+          japanRings.push(polygon[0].slice().reverse());
         }
       }
     }
@@ -166,7 +197,7 @@ async function addJapanMask() {
       style: { fillColor: '#666', fillOpacity: 0.45, weight: 0, interactive: false },
     }).addTo(map);
   } catch {
-    // マスク取得失敗時はそのまま続行
+    // マスクがなくてもプレイ可能。
   }
 }
 
@@ -184,12 +215,15 @@ function startNewGame() {
 }
 
 function startRound() {
-  round++;
+  round += 1;
   answered = false;
   current = queue[round - 1];
 
-  [guessMarker, answerMarker, connLine, highlightLayer].forEach(l => l && map.removeLayer(l));
-  guessMarker = answerMarker = connLine = highlightLayer = null;
+  [guessMarker, answerMarker, connLine, highlightLayer].forEach(layer => layer && map.removeLayer(layer));
+  guessMarker = null;
+  answerMarker = null;
+  connLine = null;
+  highlightLayer = null;
 
   el('current-round').textContent = round;
   el('municipality-name').innerHTML = formatMunicipalityName(current.name, current.nameKana);
@@ -197,22 +231,25 @@ function startRound() {
   const alwaysShow = settings.showPrefecture === 'always';
   el('prefecture-hint').textContent = (alwaysShow || duplicateNames.has(current.name)) ? current.prefecture : '';
 
-  pendingLat = pendingLng = null;
+  pendingLat = null;
+  pendingLng = null;
   el('result-panel').classList.add('hidden');
   el('confirm-btn').classList.add('hidden');
-  el('instruction').textContent = '地図をクリックしてピンを刺してください';
+  el('instruction').textContent = '地図をクリックしてピンを置いてください';
 
   map.setView(JAPAN_CENTER, JAPAN_ZOOM, { animate: true });
 
   clearTimer();
-  if (settings.timeLimit > 0) startTimer(settings.timeLimit);
+  if (settings.timeLimit > 0) {
+    startTimer(settings.timeLimit);
+  }
 }
 
 function startTimer(seconds) {
   timeLeft = seconds;
   updateTimerDisplay();
   timerInterval = setInterval(() => {
-    timeLeft--;
+    timeLeft -= 1;
     updateTimerDisplay();
     if (timeLeft <= 0) {
       clearTimer();
@@ -236,7 +273,9 @@ function updateTimerDisplay() {
 }
 
 function onTimerExpired() {
-  if (answered) return;
+  if (answered) {
+    return;
+  }
   if (pendingLat !== null) {
     revealResult(pendingLat, pendingLng);
   } else {
@@ -244,22 +283,28 @@ function onTimerExpired() {
   }
 }
 
-function onMapClick(e) {
-  if (answered) return;
+function onMapClick(event) {
+  if (answered) {
+    return;
+  }
 
-  const { lat, lng } = e.latlng;
+  const { lat, lng } = event.latlng;
   pendingLat = lat;
   pendingLng = lng;
 
-  if (guessMarker) map.removeLayer(guessMarker);
+  if (guessMarker) {
+    map.removeLayer(guessMarker);
+  }
   guessMarker = L.marker([lat, lng], { icon: pinIcon('pin-guess') }).addTo(map);
 
   el('confirm-btn').classList.remove('hidden');
-  el('instruction').textContent = 'ピンを動かせます。よければ「ここに決定！」を押してください';
+  el('instruction').textContent = 'ピンを動かせます。よければ「ここに決定」を押してください';
 }
 
 function onConfirm() {
-  if (answered || pendingLat === null) return;
+  if (answered || pendingLat === null) {
+    return;
+  }
   el('confirm-btn').classList.add('hidden');
   clearTimer();
   revealResult(pendingLat, pendingLng);
@@ -270,7 +315,9 @@ function revealResult(guessLat, guessLng) {
   clearTimer();
 
   const isTimeout = guessLat === null;
-  let dist = 0, pts = 0, inBoundary = false;
+  let dist = 0;
+  let pts = 0;
+  let inBoundary = false;
 
   if (!isTimeout) {
     dist = haversine(guessLat, guessLng, current.lat, current.lng);
@@ -283,14 +330,21 @@ function revealResult(guessLat, guessLng) {
     el('result-guess').textContent = '時間切れ';
   } else {
     const guessedName = findMunicipalityAt(guessLng, guessLat);
-    el('result-guess').textContent = guessedName ? `選択：${guessedName}` : '選択：（市区町村外）';
+    el('result-guess').textContent = guessedName ? `選択地点: ${guessedName}` : '選択地点: 市町村境界の外';
   }
 
   if (boundaryIndex) {
     const feature = boundaryIndex[current.name];
     if (feature) {
       highlightLayer = L.geoJSON(feature, {
-        style: { color: '#27ae60', weight: 2.5, opacity: 0.9, fillColor: '#27ae60', fillOpacity: 0.25, interactive: false },
+        style: {
+          color: '#27ae60',
+          weight: 2.5,
+          opacity: 0.9,
+          fillColor: '#27ae60',
+          fillOpacity: 0.25,
+          interactive: false,
+        },
         pane: 'highlightPane',
       }).addTo(map);
     }
@@ -320,12 +374,12 @@ function revealResult(guessLat, guessLng) {
   if (isTimeout) {
     el('result-distance').textContent = '時間切れ';
   } else if (inBoundary) {
-    el('result-distance').textContent = '境界内！';
+    el('result-distance').textContent = '市町村内ヒット';
   } else {
     const distLabel = dist < 1
       ? `${Math.round(dist * 1000)} m`
       : `${Math.round(dist).toLocaleString()} km`;
-    el('result-distance').textContent = `距離：${distLabel}`;
+    el('result-distance').textContent = `距離: ${distLabel}`;
   }
 
   el('result-label').innerHTML = formatAnswerLabel(current.prefecture, current.name, current.nameKana);
@@ -344,16 +398,16 @@ function showGameOver() {
   el('result-panel').classList.add('hidden');
 
   const max = settings.rounds * 10;
-  const pct = Math.round(totalScore / max * 100);
-  const msgs = [
-    [90, '地理マスター！🏆'],
-    [70, 'なかなかの腕前！'],
-    [50, 'まあまあ！'],
-    [0,  '要練習！'],
+  const pct = Math.round((totalScore / max) * 100);
+  const messages = [
+    [90, '地理マスター！'],
+    [70, 'かなり詳しいです'],
+    [50, 'まずまずです'],
+    [0, '伸びしろたっぷり'],
   ];
-  const msg = msgs.find(([threshold]) => pct >= threshold)[1];
+  const message = messages.find(([threshold]) => pct >= threshold)[1];
 
-  el('final-msg').textContent = msg;
+  el('final-msg').textContent = message;
   el('final-score').textContent = `${totalScore} / ${max}`;
   el('final-pct').textContent = `正答率 ${pct}%`;
   el('restart-btn').onclick = startNewGame;
@@ -367,35 +421,47 @@ function calcPoints(distKm, guessLat, guessLng) {
       return { pts: 10, inBoundary: true };
     }
   }
+
   for (const [maxDist, pts] of SCORE_BREAKS) {
-    if (distKm <= maxDist) return { pts, inBoundary: false };
+    if (distKm <= maxDist) {
+      return { pts, inBoundary: false };
+    }
   }
+
   return { pts: 0, inBoundary: false };
 }
 
 function findMunicipalityAt(lng, lat) {
-  if (!boundaryIndex) return null;
+  if (!boundaryIndex) {
+    return null;
+  }
   for (const [name, feature] of Object.entries(boundaryIndex)) {
-    if (pointInFeature([lng, lat], feature)) return name;
+    if (pointInFeature([lng, lat], feature)) {
+      return name;
+    }
   }
   return null;
 }
 
 function pointInFeature(point, feature) {
-  const geom = feature.geometry;
-  if (geom.type === 'Polygon') {
-    return pointInPolygon(point, geom.coordinates);
+  const geometry = feature.geometry;
+  if (geometry.type === 'Polygon') {
+    return pointInPolygon(point, geometry.coordinates);
   }
-  if (geom.type === 'MultiPolygon') {
-    return geom.coordinates.some(poly => pointInPolygon(point, poly));
+  if (geometry.type === 'MultiPolygon') {
+    return geometry.coordinates.some(polygon => pointInPolygon(point, polygon));
   }
   return false;
 }
 
 function pointInPolygon(point, rings) {
-  if (!raycast(point, rings[0])) return false;
-  for (let i = 1; i < rings.length; i++) {
-    if (raycast(point, rings[i])) return false;
+  if (!raycast(point, rings[0])) {
+    return false;
+  }
+  for (let i = 1; i < rings.length; i += 1) {
+    if (raycast(point, rings[i])) {
+      return false;
+    }
   }
   return true;
 }
@@ -403,32 +469,35 @@ function pointInPolygon(point, rings) {
 function raycast(point, ring) {
   const [x, y] = point;
   let inside = false;
+
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const [xi, yi] = ring[i];
     const [xj, yj] = ring[j];
-    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) {
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
       inside = !inside;
     }
   }
+
   return inside;
 }
 
 function haversine(lat1, lng1, lat2, lng2) {
-  const R = 6371;
+  const radiusKm = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) ** 2
-    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180)
+    + Math.cos(lat1 * Math.PI / 180)
+    * Math.cos(lat2 * Math.PI / 180)
     * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.asin(Math.sqrt(a));
+  return radiusKm * 2 * Math.asin(Math.sqrt(a));
 }
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    [array[i], array[j]] = [array[j], array[i]];
   }
-  return arr;
+  return array;
 }
 
 function pinIcon(className) {
