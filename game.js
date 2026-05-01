@@ -103,6 +103,24 @@ function formatAnswerLabel(prefecture, name, kana, showKana = settings.showKana)
   return `正解: ${escapeHtml(prefecture)} ${formatMunicipalityName(name, kana, showKana)}`;
 }
 
+function setDifficultySelection(difficulty) {
+  document.querySelectorAll('.difficulty-btn').forEach(button => {
+    button.classList.toggle('is-active', button.dataset.difficulty === difficulty);
+  });
+
+  const note = el('difficulty-note');
+  note.textContent = difficulty === 'custom'
+    ? '現在はカスタム設定です'
+    : '個別に変更するとカスタム設定になります';
+}
+
+function updateRangeDisplays() {
+  const rounds = Math.max(1, parseInt(el('setting-rounds').value, 10) || 5);
+  const timeLimit = Math.max(0, parseInt(el('setting-timelimit').value, 10) || 0);
+  el('setting-rounds-value').textContent = `${rounds}問`;
+  el('setting-timelimit-value').textContent = timeLimit > 0 ? `${timeLimit}秒` : 'なし';
+}
+
 function applyDifficultyPreset(difficulty) {
   const preset = DIFFICULTY_PRESETS[difficulty];
   if (!preset) {
@@ -112,7 +130,8 @@ function applyDifficultyPreset(difficulty) {
   el('setting-prefecture').value = preset.showPrefecture;
   el('setting-timelimit').value = String(preset.timeLimit);
   el('setting-kana').value = preset.showKana ? 'on' : 'off';
-  el('setting-difficulty').value = difficulty;
+  updateRangeDisplays();
+  setDifficultySelection(difficulty);
 }
 
 function syncDifficultySelection() {
@@ -128,7 +147,8 @@ function syncDifficultySelection() {
     && preset.showKana === currentConfig.showKana
   );
 
-  el('setting-difficulty').value = matchedDifficulty ? matchedDifficulty[0] : 'custom';
+  updateRangeDisplays();
+  setDifficultySelection(matchedDifficulty ? matchedDifficulty[0] : 'custom');
 }
 
 function init() {
@@ -153,12 +173,21 @@ function init() {
     });
 
   el('start-btn').addEventListener('click', onStartGame);
-  el('setting-difficulty').addEventListener('change', event => {
-    applyDifficultyPreset(event.target.value);
+  document.querySelectorAll('.difficulty-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      applyDifficultyPreset(button.dataset.difficulty);
+    });
+  });
+  ['setting-rounds', 'setting-timelimit'].forEach(id => {
+    el(id).addEventListener('input', updateRangeDisplays);
   });
   ['setting-prefecture', 'setting-timelimit', 'setting-kana'].forEach(id => {
-    el(id).addEventListener('change', syncDifficultySelection);
+    ['input', 'change'].forEach(eventName => {
+      el(id).addEventListener(eventName, syncDifficultySelection);
+    });
   });
+  updateRangeDisplays();
+  syncDifficultySelection();
 }
 
 function onStartGame() {
