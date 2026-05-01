@@ -191,7 +191,7 @@ function init() {
 }
 
 function onStartGame() {
-  settings.rounds = Math.max(1, Math.min(50, parseInt(el('setting-rounds').value, 10) || 5));
+  settings.rounds = Math.max(1, Math.min(30, parseInt(el('setting-rounds').value, 10) || 5));
   settings.showPrefecture = el('setting-prefecture').value;
   settings.timeLimit = Math.max(0, parseInt(el('setting-timelimit').value, 10) || 0);
   settings.showKana = el('setting-kana').value === 'on';
