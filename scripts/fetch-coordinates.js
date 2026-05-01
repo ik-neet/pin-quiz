@@ -58,6 +58,34 @@ function loadKanaByCode() {
   ]));
 }
 
+function loadMetadataByCode() {
+  if (!fs.existsSync(RAW_MUNICIPALITIES_DIR)) {
+    return new Map();
+  }
+
+  const candidates = fs.readdirSync(RAW_MUNICIPALITIES_DIR)
+    .filter(name => /^\d{4}-\d{2}-\d{2}\.json$/.test(name))
+    .sort()
+    .reverse();
+
+  if (!candidates.length) {
+    return new Map();
+  }
+
+  const latestPath = path.join(RAW_MUNICIPALITIES_DIR, candidates[0]);
+  const raw = JSON.parse(fs.readFileSync(latestPath, 'utf-8'));
+  const items = raw.items || [];
+
+  return new Map(items.map(item => [
+    item.rawCode,
+    {
+      kana: toHiragana(item.rawKana || ''),
+      type: item.rawType || null,
+      parentMunicipality: item.rawParentMunicipality || null,
+    },
+  ]));
+}
+
 // Step 1: Wikipedia titles → Wikidata QIDs (prop=pageprops)
 async function fetchQids(titles) {
   const t = titles.map(t => encodeURIComponent(t)).join('|');
@@ -114,7 +142,7 @@ async function main() {
 
   const raw = JSON.parse(fs.readFileSync(DATASET, 'utf-8'));
   const items = raw.items || raw;
-  const kanaByCode = loadKanaByCode();
+  const metadataByCode = loadMetadataByCode();
   console.log(`市町村数: ${items.length}`);
 
   // Step 1: get all QIDs
@@ -156,8 +184,10 @@ async function main() {
       results.push({
         code: m.municipalityCode,
         name: m.municipalityName,
-        nameKana: kanaByCode.get(m.municipalityCode) || null,
+        nameKana: metadataByCode.get(m.municipalityCode)?.kana || null,
         prefecture: m.prefectureName,
+        type: metadataByCode.get(m.municipalityCode)?.type || null,
+        parentMunicipality: metadataByCode.get(m.municipalityCode)?.parentMunicipality || null,
         lat: coords.lat,
         lng: coords.lng,
       });
