@@ -116,7 +116,7 @@ function setDifficultySelection(difficulty) {
 
 function updateRangeDisplays() {
   const rounds = Math.max(1, parseInt(el('setting-rounds').value, 10) || 5);
-  const timeLimit = Math.max(0, parseInt(el('setting-timelimit').value, 10) || 0);
+  const timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
   el('setting-rounds-value').textContent = `${rounds}問`;
   el('setting-timelimit-value').textContent = timeLimit > 0 ? `${timeLimit}秒` : 'なし';
 }
@@ -137,7 +137,7 @@ function applyDifficultyPreset(difficulty) {
 function syncDifficultySelection() {
   const currentConfig = {
     showPrefecture: el('setting-prefecture').value,
-    timeLimit: Math.max(0, parseInt(el('setting-timelimit').value, 10) || 0),
+    timeLimit: Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0)),
     showKana: el('setting-kana').value === 'on',
   };
 
@@ -193,7 +193,7 @@ function init() {
 function onStartGame() {
   settings.rounds = Math.max(1, Math.min(30, parseInt(el('setting-rounds').value, 10) || 5));
   settings.showPrefecture = el('setting-prefecture').value;
-  settings.timeLimit = Math.max(0, parseInt(el('setting-timelimit').value, 10) || 0);
+  settings.timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
   settings.showKana = el('setting-kana').value === 'on';
 
   el('start-screen').classList.add('hidden');
