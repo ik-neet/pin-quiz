@@ -99,6 +99,17 @@ body {
   text-align: left;
 }
 
+.setting-row-featured {
+  background:
+    linear-gradient(180deg, rgba(40, 52, 95, 0.08) 0%, rgba(255, 255, 255, 0.96) 100%);
+  border-color: rgba(40, 52, 95, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.setting-row-featured label {
+  color: var(--bg-accent);
+}
+
 .setting-row label {
   font-size: 13px;
   color: #33415c;
