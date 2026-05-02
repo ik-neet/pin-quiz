@@ -50,6 +50,10 @@ const DIFFICULTY_LABELS = {
   expert: '超上級',
   custom: 'カスタム',
 };
+
+const BOUNDARY_NAME_FIXES = {
+  '高知県::ShimantoCity': '四万十市',
+};
 const DIFFICULTY_PRESETS = {
   beginner: {
     rounds: 10,
@@ -134,6 +138,22 @@ function formatAnswerLabel(prefecture, name, kana, showKana = settings.showKana)
 
 function createMunicipalityKey(prefecture, name) {
   return `${prefecture}::${name}`;
+}
+
+function normalizeBoundaryFeature(feature) {
+  if (!feature?.properties) {
+    return feature;
+  }
+
+  const prefecture = feature.properties.NL_NAME_1 || feature.properties.NAME_1 || '';
+  const romanizedName = feature.properties.NAME_2 || '';
+  const fixedName = BOUNDARY_NAME_FIXES[createMunicipalityKey(prefecture, romanizedName)];
+
+  if (fixedName) {
+    feature.properties.NL_NAME_2 = fixedName;
+  }
+
+  return feature;
 }
 
 function getFeaturePrefecture(feature) {
@@ -295,7 +315,7 @@ async function loadBoundaryData() {
   try {
     const geojson = await fetch('./data/municipality-borders.geojson').then(response => response.json());
     boundaryIndex = {};
-    boundaryFeatures = geojson.features || [];
+    boundaryFeatures = (geojson.features || []).map(normalizeBoundaryFeature);
     for (const feature of boundaryFeatures) {
       const prefecture = feature.properties.NL_NAME_1 || feature.properties.NAME_1;
       const name = feature.properties.NL_NAME_2 || feature.properties.NAME_2;
