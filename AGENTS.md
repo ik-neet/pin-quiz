@@ -4,7 +4,7 @@
 
 ## 技術スタック
 
-- 地図: Leaflet.js 1.9.4（CDN）+ 白無地ベースタイル
+- 地図: Leaflet.js 1.9.4（CDN）+ 地図コンテナ背景色（白）
 - 境界線: TopoJSON Client 3（CDN）
 - データ:
   - `data/municipalities.json` — 座標データ（`scripts/fetch-coordinates.js` で生成）
