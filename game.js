@@ -449,8 +449,8 @@ async function addPrefectureBorders() {
     L.geoJSON(prefectureGeojson, {
       style: {
         color: '#ffffff',
-        weight: 4.4,
-        opacity: 0.98,
+        weight: 3.6,
+        opacity: 0.92,
         fillOpacity: 0,
         interactive: false,
       },
@@ -459,8 +459,8 @@ async function addPrefectureBorders() {
     L.geoJSON(prefectureGeojson, {
       style: {
         color: '#0f172a',
-        weight: 2.4,
-        opacity: 0.98,
+        weight: 1.9,
+        opacity: 0.94,
         fillOpacity: 0,
         interactive: false,
       },
@@ -492,7 +492,7 @@ async function addJapanMask() {
       type: 'Feature',
       geometry: { type: 'Polygon', coordinates: [world, ...japanRings] },
     }, {
-      style: { fillColor: '#666', fillOpacity: 0.45, weight: 0, interactive: false },
+      style: { fillColor: '#8f98a8', fillOpacity: 0.26, weight: 0, interactive: false },
     }).addTo(map);
   } catch {
     // マスクがなくてもプレイ可能。
