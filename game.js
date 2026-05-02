@@ -3,6 +3,7 @@
 const JAPAN_CENTER = [36.5, 136.0];
 const JAPAN_ZOOM = 5;
 const PREFECTURE_GEOJSON_URL = 'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_JPN_1.json';
+const JAPAN_MASK_GEOJSON_URL = 'https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson';
 const SCORE_BREAKS = [
   [20, 9], [50, 8], [100, 7],
   [200, 5], [400, 3], [700, 1], [Infinity, 0],
@@ -459,13 +460,10 @@ async function addPrefectureBorders() {
 
 async function addJapanMask() {
   try {
-    if (!prefectureGeojson) {
-      prefectureGeojson = await fetch(PREFECTURE_GEOJSON_URL).then(response => response.json());
-      prefectureIndex = buildPrefectureIndex(prefectureGeojson);
-    }
+    const geojson = await fetch(JAPAN_MASK_GEOJSON_URL).then(response => response.json());
     const japanRings = [];
 
-    for (const feature of prefectureGeojson.features || []) {
+    for (const feature of geojson.features || []) {
       const geometry = feature.geometry;
       if (geometry.type === 'Polygon') {
         japanRings.push(geometry.coordinates[0].slice().reverse());
