@@ -230,6 +230,10 @@ body {
   max-width: 120px;
 }
 
+#setting-hintcount-row input:disabled {
+  cursor: not-allowed;
+}
+
 #start-btn {
   margin-top: 20px;
   background: linear-gradient(135deg, var(--bg-accent) 0%, var(--bg-deep) 100%);
@@ -547,6 +551,42 @@ body {
   pointer-events: none;
 }
 
+#hint-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(255, 215, 0, 0.96);
+  color: #3d2d00;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 950;
+  box-shadow: 0 10px 24px rgba(20, 23, 35, 0.2);
+  transition: transform 0.1s ease, filter 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+#hint-btn:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+
+#hint-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#hint-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#hint-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .pin-guess,
 .pin-answer {
   width: 22px;
@@ -628,5 +668,12 @@ body {
 
   #result-points {
     font-size: 34px;
+  }
+
+  #hint-btn {
+    top: 12px;
+    right: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
   }
 }

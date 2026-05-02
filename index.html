@@ -59,6 +59,22 @@
         </select>
       </div>
 
+      <div class="setting-row setting-row-toggle">
+        <label for="setting-hints">ヒント表示</label>
+        <select id="setting-hints">
+          <option value="on">ON</option>
+          <option value="off">OFF</option>
+        </select>
+      </div>
+
+      <div id="setting-hintcount-row" class="setting-row setting-row-stacked">
+        <label for="setting-hintcount">ヒント回数</label>
+        <div class="slider-row">
+          <input type="range" id="setting-hintcount" value="2" min="1" max="5" step="1">
+          <span id="setting-hintcount-value" class="setting-value">2回</span>
+        </div>
+      </div>
+
       <button id="start-btn" disabled>読み込み中...</button>
     </div>
   </div>
@@ -81,6 +97,7 @@
     <div id="instruction">地図をクリックしてピンを置いてください</div>
 
     <button id="confirm-btn" class="hidden">ここに決定</button>
+    <button id="hint-btn" class="hidden">ヒントを使う</button>
 
     <div id="result-panel" class="hidden">
       <div id="result-left">

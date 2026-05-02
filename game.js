@@ -21,13 +21,20 @@ let pendingLat = null;
 let pendingLng = null;
 let boundaryIndex = null;
 let highlightLayer = null;
+let prefectureHintLayer = null;
 let duplicateNames = new Set();
+let prefectureGeojson = null;
+let prefectureIndex = null;
+let hintsRemaining = 0;
+let hintUsedThisRound = false;
 
 let settings = {
   rounds: 5,
   showPrefecture: 'auto',
   timeLimit: 0,
   showKana: true,
+  showHints: true,
+  hintCount: 2,
 };
 
 let timerInterval = null;
@@ -39,16 +46,22 @@ const DIFFICULTY_PRESETS = {
     showPrefecture: 'always',
     timeLimit: 0,
     showKana: true,
+    showHints: true,
+    hintCount: 2,
   },
   intermediate: {
     showPrefecture: 'auto',
     timeLimit: 30,
     showKana: true,
+    showHints: true,
+    hintCount: 2,
   },
   advanced: {
     showPrefecture: 'auto',
     timeLimit: 15,
     showKana: false,
+    showHints: false,
+    hintCount: 1,
   },
 };
 const EXCLUDED_MUNICIPALITY_CODES = new Set([
@@ -117,8 +130,18 @@ function setDifficultySelection(difficulty) {
 function updateRangeDisplays() {
   const rounds = Math.max(1, parseInt(el('setting-rounds').value, 10) || 5);
   const timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
+  const hintCount = Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 2));
   el('setting-rounds-value').textContent = `${rounds}問`;
   el('setting-timelimit-value').textContent = timeLimit > 0 ? `${timeLimit}秒` : 'なし';
+  el('setting-hintcount-value').textContent = `${hintCount}回`;
+}
+
+function updateHintSettingsUI() {
+  const showHints = el('setting-hints').value === 'on';
+  const hintCountRow = el('setting-hintcount-row');
+  const hintCountInput = el('setting-hintcount');
+  hintCountRow.hidden = !showHints;
+  hintCountInput.disabled = !showHints;
 }
 
 function applyDifficultyPreset(difficulty) {
@@ -130,6 +153,9 @@ function applyDifficultyPreset(difficulty) {
   el('setting-prefecture').value = preset.showPrefecture;
   el('setting-timelimit').value = String(preset.timeLimit);
   el('setting-kana').value = preset.showKana ? 'on' : 'off';
+  el('setting-hints').value = preset.showHints ? 'on' : 'off';
+  el('setting-hintcount').value = String(preset.hintCount);
+  updateHintSettingsUI();
   updateRangeDisplays();
   setDifficultySelection(difficulty);
 }
@@ -139,14 +165,19 @@ function syncDifficultySelection() {
     showPrefecture: el('setting-prefecture').value,
     timeLimit: Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0)),
     showKana: el('setting-kana').value === 'on',
+    showHints: el('setting-hints').value === 'on',
+    hintCount: Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 2)),
   };
 
   const matchedDifficulty = Object.entries(DIFFICULTY_PRESETS).find(([, preset]) =>
     preset.showPrefecture === currentConfig.showPrefecture
     && preset.timeLimit === currentConfig.timeLimit
     && preset.showKana === currentConfig.showKana
+    && preset.showHints === currentConfig.showHints
+    && preset.hintCount === currentConfig.hintCount
   );
 
+  updateHintSettingsUI();
   updateRangeDisplays();
   setDifficultySelection(matchedDifficulty ? matchedDifficulty[0] : 'custom');
 }
@@ -154,6 +185,7 @@ function syncDifficultySelection() {
 function init() {
   initMap();
   loadBoundaryData();
+  loadPrefectureData();
   applyDifficultyPreset('beginner');
 
   fetch('./data/municipalities.json')
@@ -178,14 +210,15 @@ function init() {
       applyDifficultyPreset(button.dataset.difficulty);
     });
   });
-  ['setting-rounds', 'setting-timelimit'].forEach(id => {
+  ['setting-rounds', 'setting-timelimit', 'setting-hintcount'].forEach(id => {
     el(id).addEventListener('input', updateRangeDisplays);
   });
-  ['setting-prefecture', 'setting-timelimit', 'setting-kana'].forEach(id => {
+  ['setting-prefecture', 'setting-timelimit', 'setting-kana', 'setting-hints', 'setting-hintcount'].forEach(id => {
     ['input', 'change'].forEach(eventName => {
       el(id).addEventListener(eventName, syncDifficultySelection);
     });
   });
+  el('hint-btn').addEventListener('click', onUseHint);
   updateRangeDisplays();
   syncDifficultySelection();
 }
@@ -195,6 +228,8 @@ function onStartGame() {
   settings.showPrefecture = el('setting-prefecture').value;
   settings.timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
   settings.showKana = el('setting-kana').value === 'on';
+  settings.showHints = el('setting-hints').value === 'on';
+  settings.hintCount = Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 2));
 
   el('start-screen').classList.add('hidden');
   startNewGame();
@@ -213,6 +248,60 @@ async function loadBoundaryData() {
   } catch {
     // 境界データがなくても距離ベースの採点で続行する。
   }
+}
+
+async function loadPrefectureData() {
+  try {
+    prefectureGeojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson')
+      .then(response => response.json());
+    prefectureIndex = buildPrefectureIndex(prefectureGeojson);
+  } catch {
+    prefectureGeojson = null;
+    prefectureIndex = null;
+  }
+}
+
+function buildPrefectureIndex(geojson) {
+  const index = {};
+  for (const feature of geojson.features || []) {
+    const names = extractPrefectureNames(feature);
+    for (const name of names) {
+      index[name] = feature;
+    }
+  }
+  return index;
+}
+
+function extractPrefectureNames(feature) {
+  const properties = feature?.properties || {};
+  const candidates = [
+    properties.nam_ja,
+    properties.nam,
+    properties.name_ja,
+    properties.name,
+    properties.prefecture,
+    properties.pref,
+    properties.NL_NAME_1,
+    properties.NAME_1,
+  ];
+  const names = new Set();
+  for (const value of candidates) {
+    if (!value) {
+      continue;
+    }
+    const normalized = normalizePrefectureName(value);
+    if (normalized) {
+      names.add(normalized);
+    }
+  }
+  return [...names];
+}
+
+function normalizePrefectureName(value) {
+  return String(value)
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/都道府県$/u, '');
 }
 
 function initMap() {
@@ -234,10 +323,13 @@ function initMap() {
   map.getPane('municipalityPane').style.zIndex = 420;
   map.createPane('prefecturePane');
   map.getPane('prefecturePane').style.zIndex = 430;
+  map.createPane('prefectureHintPane');
+  map.getPane('prefectureHintPane').style.zIndex = 440;
   map.createPane('highlightPane');
   map.getPane('highlightPane').style.zIndex = 450;
   map.getPane('municipalityPane').style.pointerEvents = 'none';
   map.getPane('prefecturePane').style.pointerEvents = 'none';
+  map.getPane('prefectureHintPane').style.pointerEvents = 'none';
   map.getPane('highlightPane').style.pointerEvents = 'none';
 
   map.on('click', onMapClick);
@@ -267,8 +359,11 @@ async function addMunicipalityBorders() {
 
 async function addPrefectureBorders() {
   try {
-    const geojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson').then(response => response.json());
-    L.geoJSON(geojson, {
+    if (!prefectureGeojson) {
+      prefectureGeojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson').then(response => response.json());
+      prefectureIndex = buildPrefectureIndex(prefectureGeojson);
+    }
+    L.geoJSON(prefectureGeojson, {
       style: {
         color: '#1a1a2e',
         weight: 1.2,
@@ -315,6 +410,7 @@ function startNewGame() {
   round = 0;
   totalScore = 0;
   answered = false;
+  hintsRemaining = settings.showHints ? settings.hintCount : 0;
   queue = shuffle([...municipalities]).slice(0, settings.rounds);
 
   el('total-rounds').textContent = settings.rounds;
@@ -328,12 +424,14 @@ function startRound() {
   round += 1;
   answered = false;
   current = queue[round - 1];
+  hintUsedThisRound = false;
 
-  [guessMarker, answerMarker, connLine, highlightLayer].forEach(layer => layer && map.removeLayer(layer));
+  [guessMarker, answerMarker, connLine, highlightLayer, prefectureHintLayer].forEach(layer => layer && map.removeLayer(layer));
   guessMarker = null;
   answerMarker = null;
   connLine = null;
   highlightLayer = null;
+  prefectureHintLayer = null;
 
   el('current-round').textContent = round;
   el('municipality-name').innerHTML = formatMunicipalityName(current.name, current.nameKana);
@@ -345,6 +443,7 @@ function startRound() {
   pendingLng = null;
   el('result-panel').classList.add('hidden');
   el('confirm-btn').classList.add('hidden');
+  updateHintButton();
   el('instruction').textContent = '地図をクリックしてピンを置いてください';
 
   map.setView(JAPAN_CENTER, JAPAN_ZOOM, { animate: true });
@@ -420,9 +519,51 @@ function onConfirm() {
   revealResult(pendingLat, pendingLng);
 }
 
+function updateHintButton() {
+  const button = el('hint-btn');
+  const canUseHint = settings.showHints && !answered && hintsRemaining > 0 && !hintUsedThisRound;
+  button.classList.toggle('hidden', !settings.showHints);
+  button.disabled = !canUseHint;
+  button.textContent = `ヒント (${hintsRemaining}回)`;
+}
+
+function onUseHint() {
+  if (answered || !settings.showHints || hintsRemaining <= 0 || hintUsedThisRound) {
+    return;
+  }
+
+  const feature = prefectureIndex?.[normalizePrefectureName(current.prefecture)];
+  if (!feature) {
+    el('instruction').textContent = '都道府県ヒントを表示できませんでした';
+    return;
+  }
+
+  if (prefectureHintLayer) {
+    map.removeLayer(prefectureHintLayer);
+  }
+
+  prefectureHintLayer = L.geoJSON(feature, {
+    style: {
+      color: '#f39c12',
+      weight: 3,
+      opacity: 0.95,
+      fillColor: '#f1c40f',
+      fillOpacity: 0.28,
+      interactive: false,
+    },
+    pane: 'prefectureHintPane',
+  }).addTo(map);
+
+  hintsRemaining -= 1;
+  hintUsedThisRound = true;
+  updateHintButton();
+  el('instruction').textContent = `ヒント表示中: ${current.prefecture} の範囲を強調しています`;
+}
+
 function revealResult(guessLat, guessLng) {
   answered = true;
   clearTimer();
+  updateHintButton();
 
   const isTimeout = guessLat === null;
   let dist = 0;
