@@ -401,6 +401,8 @@ function initMap() {
 
   map.createPane('municipalityPane');
   map.getPane('municipalityPane').style.zIndex = 420;
+  map.createPane('prefectureHaloPane');
+  map.getPane('prefectureHaloPane').style.zIndex = 425;
   map.createPane('prefecturePane');
   map.getPane('prefecturePane').style.zIndex = 430;
   map.createPane('prefectureHintPane');
@@ -408,6 +410,7 @@ function initMap() {
   map.createPane('highlightPane');
   map.getPane('highlightPane').style.zIndex = 450;
   map.getPane('municipalityPane').style.pointerEvents = 'none';
+  map.getPane('prefectureHaloPane').style.pointerEvents = 'none';
   map.getPane('prefecturePane').style.pointerEvents = 'none';
   map.getPane('prefectureHintPane').style.pointerEvents = 'none';
   map.getPane('highlightPane').style.pointerEvents = 'none';
@@ -445,9 +448,19 @@ async function addPrefectureBorders() {
     }
     L.geoJSON(prefectureGeojson, {
       style: {
+        color: '#f4f7fb',
+        weight: 3.2,
+        opacity: 0.9,
+        fillOpacity: 0,
+        interactive: false,
+      },
+      pane: 'prefectureHaloPane',
+    }).addTo(map);
+    L.geoJSON(prefectureGeojson, {
+      style: {
         color: '#1a1a2e',
-        weight: 1.2,
-        opacity: 0.7,
+        weight: 1.8,
+        opacity: 0.92,
         fillOpacity: 0,
         interactive: false,
       },

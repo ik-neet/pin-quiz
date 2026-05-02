@@ -76,6 +76,7 @@ npm run fetch-borders   # data/municipality-borders.geojson を生成
 | Pane | zIndex | 用途 |
 |------|--------|------|
 | `municipalityPane` | 420 | 市区町村境界線（細線） |
+| `prefectureHaloPane` | 425 | 都道府県境界の下地線 |
 | `prefecturePane` | 430 | 都道府県境界線（太線） |
 | `highlightPane` | 450 | 正解市区町村のハイライト |
 
