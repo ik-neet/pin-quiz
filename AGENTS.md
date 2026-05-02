@@ -9,6 +9,7 @@
 - データ:
   - `data/municipalities.json` — 座標データ（`scripts/fetch-coordinates.js` で生成）
   - `data/municipality-borders.geojson` — 市区町村境界（`scripts/fetch-municipality-borders.js` で生成）
+  - `data/prefecture-borders.geojson` — 都道府県境界（`scripts/fetch-prefecture-borders.js` で生成）
 - フロント: 素の HTML/CSS/JS（フレームワークなし）
 - ホスティング: Vercel（`push` で自動デプロイ）
 
@@ -21,9 +22,11 @@ game.js               ゲームロジック全体
 scripts/
   fetch-coordinates.js         座標データ生成
   fetch-municipality-borders.js 境界 GeoJSON 生成
+  fetch-prefecture-borders.js   都道府県境界 GeoJSON 生成
 data/
   municipalities.json          座標データ（Git 管理外）
   municipality-borders.geojson 境界データ（Git 管理外）
+  prefecture-borders.geojson   都道府県境界データ
 ```
 
 ## データ生成
@@ -31,6 +34,7 @@ data/
 ```bash
 npm run fetch-coords    # data/municipalities.json を生成
 npm run fetch-borders   # data/municipality-borders.geojson を生成
+npm run fetch-prefecture-borders  # data/prefecture-borders.geojson を生成
 ```
 
 ### fetch-coordinates.js
@@ -44,6 +48,11 @@ npm run fetch-borders   # data/municipality-borders.geojson を生成
 - GADM 4.1（`gadm41_JPN_2.json`）から GeoJSON をダウンロード
 - `data/municipality-borders.geojson` に出力
 - ファイルサイズが大きいためリダイレクト対応済み
+
+### fetch-prefecture-borders.js
+
+- GADM 4.1（`gadm41_JPN_1.json`）から GeoJSON をダウンロード
+- `data/prefecture-borders.geojson` に出力
 
 ## ゲーム設定（スタート画面）
 
@@ -81,7 +90,7 @@ npm run fetch-borders   # data/municipality-borders.geojson を生成
 | `highlightPane` | 450 | 正解市区町村のハイライト |
 
 - 日本国外はグレーマスクで覆い、地図範囲を日本周辺に制限
-- 都道府県境界は GADM 4.1 の `gadm41_JPN_1.json` を CDN から取得
+- 都道府県境界はローカルの `data/prefecture-borders.geojson` を使用
 - 日本国外マスクは `dataofjapan/land` の `japan.geojson` を CDN から取得
 
 ## Vercel 設定

@@ -2,7 +2,7 @@
 
 const JAPAN_CENTER = [36.5, 136.0];
 const JAPAN_ZOOM = 5;
-const PREFECTURE_GEOJSON_URL = 'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_JPN_1.json';
+const PREFECTURE_GEOJSON_URL = './data/prefecture-borders.geojson';
 const JAPAN_MASK_GEOJSON_URL = 'https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson';
 const SCORE_BREAKS = [
   [20, 9], [50, 8], [100, 7],
@@ -448,9 +448,9 @@ async function addPrefectureBorders() {
     }
     L.geoJSON(prefectureGeojson, {
       style: {
-        color: '#f4f7fb',
-        weight: 3.2,
-        opacity: 0.9,
+        color: '#ffffff',
+        weight: 4.4,
+        opacity: 0.98,
         fillOpacity: 0,
         interactive: false,
       },
@@ -458,9 +458,9 @@ async function addPrefectureBorders() {
     }).addTo(map);
     L.geoJSON(prefectureGeojson, {
       style: {
-        color: '#1a1a2e',
-        weight: 1.8,
-        opacity: 0.92,
+        color: '#0f172a',
+        weight: 2.4,
+        opacity: 0.98,
         fillOpacity: 0,
         interactive: false,
       },
