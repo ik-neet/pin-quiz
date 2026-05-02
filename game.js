@@ -119,6 +119,10 @@ function formatAnswerLabel(prefecture, name, kana, showKana = settings.showKana)
   return `正解: ${escapeHtml(prefecture)} ${formatMunicipalityName(name, kana, showKana)}`;
 }
 
+function createMunicipalityKey(prefecture, name) {
+  return `${prefecture}::${name}`;
+}
+
 function setDifficultySelection(difficulty) {
   document.querySelectorAll('.difficulty-btn').forEach(button => {
     button.classList.toggle('is-active', button.dataset.difficulty === difficulty);
@@ -246,9 +250,10 @@ async function loadBoundaryData() {
     const geojson = await fetch('./data/municipality-borders.geojson').then(response => response.json());
     boundaryIndex = {};
     for (const feature of geojson.features) {
+      const prefecture = feature.properties.NL_NAME_1 || feature.properties.NAME_1;
       const name = feature.properties.NL_NAME_2 || feature.properties.NAME_2;
-      if (name) {
-        boundaryIndex[name] = feature;
+      if (prefecture && name) {
+        boundaryIndex[createMunicipalityKey(prefecture, name)] = feature;
       }
     }
   } catch {
@@ -597,7 +602,7 @@ function revealResult(guessLat, guessLng) {
   }
 
   if (boundaryIndex) {
-    const feature = boundaryIndex[current.name];
+    const feature = boundaryIndex[createMunicipalityKey(current.prefecture, current.name)];
     if (feature) {
       highlightLayer = L.geoJSON(feature, {
         style: {
@@ -680,7 +685,7 @@ function showGameOver() {
 
 function calcPoints(distKm, guessLat, guessLng) {
   if (boundaryIndex && current) {
-    const feature = boundaryIndex[current.name];
+    const feature = boundaryIndex[createMunicipalityKey(current.prefecture, current.name)];
     if (feature && pointInFeature([guessLng, guessLat], feature)) {
       return { pts: 10, inBoundary: true };
     }
