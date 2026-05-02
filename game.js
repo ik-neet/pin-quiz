@@ -27,6 +27,7 @@ let prefectureGeojson = null;
 let prefectureIndex = null;
 let hintsRemaining = 0;
 let hintUsedThisRound = false;
+let selectedDifficulty = 'beginner';
 
 let settings = {
   rounds: 10,
@@ -34,12 +35,20 @@ let settings = {
   showKana: true,
   showHints: true,
   hintCount: 3,
+  difficulty: 'beginner',
 };
 
 let timerInterval = null;
 let timeLeft = 0;
 
 const el = id => document.getElementById(id);
+const DIFFICULTY_LABELS = {
+  beginner: '初級',
+  intermediate: '中級',
+  advanced: '上級',
+  expert: '超上級',
+  custom: 'カスタム',
+};
 const DIFFICULTY_PRESETS = {
   beginner: {
     rounds: 10,
@@ -127,6 +136,7 @@ function createMunicipalityKey(prefecture, name) {
 }
 
 function setDifficultySelection(difficulty) {
+  selectedDifficulty = difficulty;
   document.querySelectorAll('.difficulty-btn').forEach(button => {
     button.classList.toggle('is-active', button.dataset.difficulty === difficulty);
   });
@@ -239,6 +249,7 @@ function onStartGame() {
   settings.showKana = el('setting-kana').checked;
   settings.showHints = el('setting-hints').checked;
   settings.hintCount = Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 3));
+  settings.difficulty = selectedDifficulty;
 
   el('start-screen').classList.add('hidden');
   startNewGame();
@@ -436,31 +447,28 @@ function returnToSettings() {
   el('start-screen').classList.remove('hidden');
 }
 
-function buildShareText() {
-  return `日本市区町村 位置当てゲームで ${totalScore} / ${settings.rounds * 10} 点を獲得しました。`;
+function getDifficultyLabel(difficulty = settings.difficulty) {
+  return DIFFICULTY_LABELS[difficulty] || DIFFICULTY_LABELS.custom;
 }
 
-async function shareResult() {
+function buildShareText() {
+  return `日本市区町村 位置当てゲームで${getDifficultyLabel()}・${totalScore} / ${settings.rounds * 10}点を獲得しました。`;
+}
+
+function shareOnX() {
   const text = buildShareText();
   const shareUrl = window.location.href;
-
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: '日本市区町村 位置当てゲーム',
-        text,
-        url: shareUrl,
-      });
-      return;
-    } catch (error) {
-      if (error && error.name === 'AbortError') {
-        return;
-      }
-    }
-  }
-
   window.open(
     `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
+    '_blank',
+    'noopener,noreferrer'
+  );
+}
+
+function shareOnLine() {
+  const text = `${buildShareText()} ${window.location.href}`;
+  window.open(
+    `https://line.me/R/msg/text/?${encodeURIComponent(text)}`,
     '_blank',
     'noopener,noreferrer'
   );
@@ -705,7 +713,9 @@ function showGameOver() {
 
   el('final-msg').textContent = message;
   el('final-score').textContent = `${totalScore} / ${max}`;
-  el('share-btn').onclick = shareResult;
+  el('final-difficulty').textContent = `難易度: ${getDifficultyLabel()}`;
+  el('share-x-btn').onclick = shareOnX;
+  el('share-line-btn').onclick = shareOnLine;
   el('back-to-settings-btn').onclick = returnToSettings;
   el('restart-btn').onclick = startNewGame;
   el('game-over').classList.remove('hidden');
@@ -732,8 +742,9 @@ function findMunicipalityAt(lng, lat) {
   if (!boundaryIndex) {
     return null;
   }
-  for (const [name, feature] of Object.entries(boundaryIndex)) {
+  for (const feature of Object.values(boundaryIndex)) {
     if (pointInFeature([lng, lat], feature)) {
+      const name = feature.properties.NL_NAME_2 || feature.properties.NAME_2 || '';
       const prefecture = feature.properties.NL_NAME_1 || feature.properties.NAME_1 || '';
       return prefecture ? `${prefecture} ${name}` : name;
     }

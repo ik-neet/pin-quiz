@@ -580,7 +580,23 @@ body {
   line-height: 1;
 }
 
-#share-btn,
+#final-difficulty {
+  font-size: 15px;
+  color: #62708a;
+  margin-top: 10px;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+
+.share-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+#share-x-btn,
+#share-line-btn,
 #game-over-card .secondary-action,
 #restart-btn {
   background: var(--bg-deep);
@@ -593,18 +609,26 @@ body {
   transition: background 0.2s, transform 0.1s;
 }
 
-#share-btn {
-  display: block;
+#share-x-btn,
+#share-line-btn {
   width: 100%;
-  margin-bottom: 12px;
+}
+
+#share-x-btn {
   background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
 }
 
-#share-btn:hover {
+#share-line-btn {
+  background: linear-gradient(135deg, #06c755 0%, #00a63e 100%);
+}
+
+#share-x-btn:hover,
+#share-line-btn:hover {
   filter: brightness(1.06);
 }
 
-#share-btn:active {
+#share-x-btn:active,
+#share-line-btn:active {
   transform: scale(0.97);
 }
 
@@ -789,6 +813,10 @@ body {
 
   #result-points {
     font-size: 34px;
+  }
+
+  .share-actions {
+    grid-template-columns: 1fr;
   }
 
   #hint-btn {
