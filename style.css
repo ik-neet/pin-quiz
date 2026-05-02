@@ -510,6 +510,7 @@ body {
   margin-bottom: 28px;
 }
 
+#game-over-card .secondary-action,
 #restart-btn {
   background: var(--bg-deep);
   color: white;
@@ -519,6 +520,22 @@ body {
   font-size: 16px;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
+}
+
+#game-over-card .secondary-action {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  background: #eef2f9;
+  color: var(--bg-accent);
+}
+
+#game-over-card .secondary-action:hover {
+  background: #dde6f6;
+}
+
+#game-over-card .secondary-action:active {
+  transform: scale(0.97);
 }
 
 #restart-btn:hover  { background: #2d2d5e; }

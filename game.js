@@ -420,6 +420,12 @@ function startNewGame() {
   startRound();
 }
 
+function returnToSettings() {
+  clearTimer();
+  el('game-over').classList.add('hidden');
+  el('start-screen').classList.remove('hidden');
+}
+
 function startRound() {
   round += 1;
   answered = false;
@@ -661,6 +667,7 @@ function showGameOver() {
   el('final-msg').textContent = message;
   el('final-score').textContent = `${totalScore} / ${max}`;
   el('final-pct').textContent = `正答率 ${pct}%`;
+  el('back-to-settings-btn').onclick = returnToSettings;
   el('restart-btn').onclick = startNewGame;
   el('game-over').classList.remove('hidden');
 }
