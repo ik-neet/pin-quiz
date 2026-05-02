@@ -53,18 +53,30 @@
 
       <div class="setting-row setting-row-toggle">
         <label for="setting-kana">ふりがな表示</label>
-        <select id="setting-kana">
-          <option value="on">ON</option>
-          <option value="off">OFF</option>
-        </select>
+        <label class="switch" for="setting-kana">
+          <input type="checkbox" id="setting-kana" checked>
+          <span class="switch-track">
+            <span class="switch-thumb"></span>
+          </span>
+          <span class="switch-labels" aria-hidden="true">
+            <span>OFF</span>
+            <span>ON</span>
+          </span>
+        </label>
       </div>
 
       <div class="setting-row setting-row-toggle">
         <label for="setting-hints">ヒント表示</label>
-        <select id="setting-hints">
-          <option value="on">ON</option>
-          <option value="off">OFF</option>
-        </select>
+        <label class="switch" for="setting-hints">
+          <input type="checkbox" id="setting-hints" checked>
+          <span class="switch-track">
+            <span class="switch-thumb"></span>
+          </span>
+          <span class="switch-labels" aria-hidden="true">
+            <span>OFF</span>
+            <span>ON</span>
+          </span>
+        </label>
       </div>
 
       <div id="setting-hintcount-row" class="setting-row setting-row-stacked">

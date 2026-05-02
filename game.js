@@ -140,7 +140,7 @@ function updateRangeDisplays() {
 }
 
 function updateHintSettingsUI() {
-  const showHints = el('setting-hints').value === 'on';
+  const showHints = el('setting-hints').checked;
   const hintCountRow = el('setting-hintcount-row');
   const hintCountInput = el('setting-hintcount');
   hintCountRow.hidden = !showHints;
@@ -156,8 +156,8 @@ function applyDifficultyPreset(difficulty) {
   el('setting-rounds').value = String(preset.rounds);
   el('setting-prefecture').value = preset.showPrefecture;
   el('setting-timelimit').value = String(preset.timeLimit);
-  el('setting-kana').value = preset.showKana ? 'on' : 'off';
-  el('setting-hints').value = preset.showHints ? 'on' : 'off';
+  el('setting-kana').checked = preset.showKana;
+  el('setting-hints').checked = preset.showHints;
   el('setting-hintcount').value = String(preset.hintCount);
   updateHintSettingsUI();
   updateRangeDisplays();
@@ -169,8 +169,8 @@ function syncDifficultySelection() {
     rounds: Math.max(1, Math.min(30, parseInt(el('setting-rounds').value, 10) || 10)),
     showPrefecture: el('setting-prefecture').value,
     timeLimit: Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0)),
-    showKana: el('setting-kana').value === 'on',
-    showHints: el('setting-hints').value === 'on',
+    showKana: el('setting-kana').checked,
+    showHints: el('setting-hints').checked,
     hintCount: Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 3)),
   };
 
@@ -233,8 +233,8 @@ function onStartGame() {
   settings.rounds = Math.max(1, Math.min(30, parseInt(el('setting-rounds').value, 10) || 10));
   settings.showPrefecture = el('setting-prefecture').value;
   settings.timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
-  settings.showKana = el('setting-kana').value === 'on';
-  settings.showHints = el('setting-hints').value === 'on';
+  settings.showKana = el('setting-kana').checked;
+  settings.showHints = el('setting-hints').checked;
   settings.hintCount = Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 3));
 
   el('start-screen').classList.add('hidden');
