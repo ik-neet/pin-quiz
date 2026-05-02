@@ -63,7 +63,7 @@ const DIFFICULTY_PRESETS = {
     hintCount: 1,
   },
   expert: {
-    rounds: 30,
+    rounds: 20,
     timeLimit: 15,
     showKana: false,
     showHints: false,
@@ -172,7 +172,7 @@ function applyDifficultyPreset(difficulty) {
 
 function syncDifficultySelection() {
   const currentConfig = {
-    rounds: Math.max(1, Math.min(30, parseInt(el('setting-rounds').value, 10) || 10)),
+    rounds: Math.max(1, Math.min(20, parseInt(el('setting-rounds').value, 10) || 10)),
     timeLimit: Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0)),
     showKana: el('setting-kana').checked,
     showHints: el('setting-hints').checked,
@@ -234,7 +234,7 @@ function init() {
 }
 
 function onStartGame() {
-  settings.rounds = Math.max(1, Math.min(30, parseInt(el('setting-rounds').value, 10) || 10));
+  settings.rounds = Math.max(1, Math.min(20, parseInt(el('setting-rounds').value, 10) || 10));
   settings.timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
   settings.showKana = el('setting-kana').checked;
   settings.showHints = el('setting-hints').checked;
