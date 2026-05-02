@@ -268,14 +268,30 @@ body {
 }
 
 .switch-labels {
+  position: relative;
   display: inline-flex;
-  gap: 6px;
+  align-items: center;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
   color: #70809d;
-  min-width: 50px;
-  justify-content: space-between;
+  min-width: 32px;
+}
+
+.switch-labels span {
+  display: none;
+}
+
+.switch-labels span:first-child {
+  display: inline;
+}
+
+.switch input:checked ~ .switch-labels span {
+  display: none;
+}
+
+.switch input:checked ~ .switch-labels span:last-child {
+  display: inline;
 }
 
 .switch input:checked + .switch-track {
