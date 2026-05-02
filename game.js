@@ -26,6 +26,7 @@ let pendingLng = null;
 let boundaryIndex = null;
 let boundaryFeatures = [];
 let highlightLayer = null;
+let selectedHighlightLayer = null;
 let prefectureHintLayer = null;
 let duplicateNames = new Set();
 let prefectureGeojson = null;
@@ -194,6 +195,38 @@ function getBoundaryFeatureForMunicipality(municipality) {
   return samePrefectureFeatures.find(feature =>
     pointInFeature([municipality.lng, municipality.lat], feature)
   ) || null;
+}
+
+function findMunicipalityFeatureAt(lng, lat) {
+  if (!boundaryFeatures.length) {
+    return null;
+  }
+
+  return boundaryFeatures.find(feature => pointInFeature([lng, lat], feature)) || null;
+}
+
+function formatFeatureMunicipalityLabel(feature) {
+  if (!feature) {
+    return '';
+  }
+
+  const prefecture = getFeaturePrefecture(feature);
+  const name = getFeatureMunicipalityName(feature);
+  return prefecture ? `${prefecture} ${name}` : name;
+}
+
+function isSameMunicipalityFeature(left, right) {
+  if (!left || !right) {
+    return false;
+  }
+
+  return createMunicipalityKey(
+    getFeaturePrefecture(left),
+    getFeatureMunicipalityName(left)
+  ) === createMunicipalityKey(
+    getFeaturePrefecture(right),
+    getFeatureMunicipalityName(right)
+  );
 }
 
 function setDifficultySelection(difficulty) {
@@ -416,12 +449,15 @@ function initMap() {
   map.getPane('prefectureHintPane').style.zIndex = 440;
   map.createPane('highlightPane');
   map.getPane('highlightPane').style.zIndex = 450;
+  map.createPane('selectedHighlightPane');
+  map.getPane('selectedHighlightPane').style.zIndex = 455;
   map.getPane('municipalityPane').style.pointerEvents = 'none';
   map.getPane('waterBodyPane').style.pointerEvents = 'none';
   map.getPane('prefectureHaloPane').style.pointerEvents = 'none';
   map.getPane('prefecturePane').style.pointerEvents = 'none';
   map.getPane('prefectureHintPane').style.pointerEvents = 'none';
   map.getPane('highlightPane').style.pointerEvents = 'none';
+  map.getPane('selectedHighlightPane').style.pointerEvents = 'none';
 
   map.on('click', onMapClick);
   el('confirm-btn').addEventListener('click', onConfirm);
@@ -588,11 +624,13 @@ function startRound() {
   current = queue[round - 1];
   hintUsedThisRound = false;
 
-  [guessMarker, answerMarker, connLine, highlightLayer, prefectureHintLayer].forEach(layer => layer && map.removeLayer(layer));
+  [guessMarker, answerMarker, connLine, highlightLayer, selectedHighlightLayer, prefectureHintLayer]
+    .forEach(layer => layer && map.removeLayer(layer));
   guessMarker = null;
   answerMarker = null;
   connLine = null;
   highlightLayer = null;
+  selectedHighlightLayer = null;
   prefectureHintLayer = null;
 
   el('current-round').textContent = round;
@@ -737,29 +775,53 @@ function revealResult(guessLat, guessLng) {
   }
 
   totalScore += pts;
+  const guessedFeature = !isTimeout ? findMunicipalityFeatureAt(guessLng, guessLat) : null;
+  const answerFeature = boundaryIndex ? getBoundaryFeatureForMunicipality(current) : null;
 
   if (isTimeout) {
     el('result-guess').textContent = '時間切れ';
   } else {
-    const guessedName = findMunicipalityAt(guessLng, guessLat);
-    el('result-guess').textContent = guessedName ? `選択地点: ${guessedName}` : '選択地点: 市町村境界の外';
+    const guessedName = guessedFeature ? formatFeatureMunicipalityLabel(guessedFeature) : null;
+    el('result-guess').textContent = guessedName ? `選択市町村: ${guessedName}` : '選択地点: 市町村境界の外';
   }
 
-  if (boundaryIndex) {
-    const feature = getBoundaryFeatureForMunicipality(current);
-    if (feature) {
-      highlightLayer = L.geoJSON(feature, {
-        style: {
-          color: '#27ae60',
-          weight: 2.5,
-          opacity: 0.9,
-          fillColor: '#27ae60',
-          fillOpacity: 0.25,
-          interactive: false,
-        },
-        pane: 'highlightPane',
-      }).addTo(map);
+  if (guessedFeature) {
+    const selectedSameAsAnswer = isSameMunicipalityFeature(guessedFeature, answerFeature);
+    selectedHighlightLayer = L.geoJSON(guessedFeature, {
+      style: {
+        color: '#2563eb',
+        weight: selectedSameAsAnswer ? 3.6 : 3,
+        opacity: 0.95,
+        dashArray: selectedSameAsAnswer ? '8 6' : null,
+        fillColor: '#60a5fa',
+        fillOpacity: selectedSameAsAnswer ? 0.08 : 0.18,
+        interactive: false,
+      },
+      pane: 'selectedHighlightPane',
+    }).addTo(map);
+
+    if (guessMarker) {
+      guessMarker.bindTooltip(`選択: ${formatFeatureMunicipalityLabel(guessedFeature)}`, {
+        permanent: true,
+        direction: 'top',
+        offset: [0, -22],
+        className: 'selected-municipality-tooltip',
+      }).openTooltip();
     }
+  }
+
+  if (answerFeature) {
+    highlightLayer = L.geoJSON(answerFeature, {
+      style: {
+        color: '#27ae60',
+        weight: 2.5,
+        opacity: 0.9,
+        fillColor: '#27ae60',
+        fillOpacity: 0.25,
+        interactive: false,
+      },
+      pane: 'highlightPane',
+    }).addTo(map);
   }
 
   answerMarker = L.marker([current.lat, current.lng], { icon: pinIcon('pin-answer') })
@@ -847,17 +909,8 @@ function calcPoints(distKm, guessLat, guessLng) {
 }
 
 function findMunicipalityAt(lng, lat) {
-  if (!boundaryIndex) {
-    return null;
-  }
-  for (const feature of Object.values(boundaryIndex)) {
-    if (pointInFeature([lng, lat], feature)) {
-      const name = feature.properties.NL_NAME_2 || feature.properties.NAME_2 || '';
-      const prefecture = feature.properties.NL_NAME_1 || feature.properties.NAME_1 || '';
-      return prefecture ? `${prefecture} ${name}` : name;
-    }
-  }
-  return null;
+  const feature = findMunicipalityFeatureAt(lng, lat);
+  return feature ? formatFeatureMunicipalityLabel(feature) : null;
 }
 
 function pointInFeature(point, feature) {

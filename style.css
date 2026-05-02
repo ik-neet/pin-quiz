@@ -729,6 +729,22 @@ body {
 .pin-guess  { background: var(--danger); }
 .pin-answer { background: var(--success); }
 
+.selected-municipality-tooltip {
+  background: rgba(37, 99, 235, 0.94);
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.selected-municipality-tooltip::before {
+  display: none;
+}
+
 @media (max-width: 640px) {
   #start-screen {
     padding: 16px;

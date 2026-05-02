@@ -99,6 +99,7 @@ npm run fetch-water-bodies  # data/water-bodies.geojson を生成
 | `prefectureHaloPane` | 425 | 都道府県境界の下地線 |
 | `prefecturePane` | 430 | 都道府県境界線（太線） |
 | `highlightPane` | 450 | 正解市区町村のハイライト |
+| `selectedHighlightPane` | 455 | 選択市区町村のハイライト |
 
 - 日本国外はグレーマスクで覆い、地図範囲を日本周辺に制限
 - 水域はローカルの `data/water-bodies.geojson` を使用
