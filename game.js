@@ -4,10 +4,12 @@ const JAPAN_CENTER = [36.5, 136.0];
 const JAPAN_ZOOM = 5;
 const PREFECTURE_GEOJSON_URL = './data/prefecture-borders.geojson';
 const JAPAN_MASK_GEOJSON_URL = 'https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson';
+const WATER_BODIES_GEOJSON_URL = './data/water-bodies.geojson';
 const SCORE_BREAKS = [
   [20, 9], [50, 8], [100, 7],
   [200, 5], [400, 3], [700, 1], [Infinity, 0],
 ];
+const WATER_BODY_VISIBILITY_OVERRIDES = {};
 
 let municipalities = [];
 let queue = [];
@@ -28,6 +30,7 @@ let prefectureHintLayer = null;
 let duplicateNames = new Set();
 let prefectureGeojson = null;
 let prefectureIndex = null;
+let waterBodiesLayer = null;
 let hintsRemaining = 0;
 let hintUsedThisRound = false;
 let selectedDifficulty = 'beginner';
@@ -384,6 +387,14 @@ function normalizePrefectureName(value) {
     .replace(/都道府県$/u, '');
 }
 
+function isWaterBodyVisible(feature) {
+  const id = feature?.properties?.id;
+  if (id && Object.prototype.hasOwnProperty.call(WATER_BODY_VISIBILITY_OVERRIDES, id)) {
+    return WATER_BODY_VISIBILITY_OVERRIDES[id];
+  }
+  return feature?.properties?.defaultVisible !== false;
+}
+
 function initMap() {
   map = L.map('map', {
     center: JAPAN_CENTER,
@@ -395,6 +406,8 @@ function initMap() {
 
   map.createPane('municipalityPane');
   map.getPane('municipalityPane').style.zIndex = 420;
+  map.createPane('waterBodyPane');
+  map.getPane('waterBodyPane').style.zIndex = 410;
   map.createPane('prefectureHaloPane');
   map.getPane('prefectureHaloPane').style.zIndex = 425;
   map.createPane('prefecturePane');
@@ -404,6 +417,7 @@ function initMap() {
   map.createPane('highlightPane');
   map.getPane('highlightPane').style.zIndex = 450;
   map.getPane('municipalityPane').style.pointerEvents = 'none';
+  map.getPane('waterBodyPane').style.pointerEvents = 'none';
   map.getPane('prefectureHaloPane').style.pointerEvents = 'none';
   map.getPane('prefecturePane').style.pointerEvents = 'none';
   map.getPane('prefectureHintPane').style.pointerEvents = 'none';
@@ -412,8 +426,36 @@ function initMap() {
   map.on('click', onMapClick);
   el('confirm-btn').addEventListener('click', onConfirm);
   addJapanMask();
+  addWaterBodies();
   addMunicipalityBorders();
   addPrefectureBorders();
+}
+
+async function addWaterBodies() {
+  try {
+    const geojson = await fetch(WATER_BODIES_GEOJSON_URL).then(response => response.json());
+    const visibleFeatures = (geojson.features || []).filter(isWaterBodyVisible);
+    if (!visibleFeatures.length) {
+      return;
+    }
+
+    waterBodiesLayer = L.geoJSON({
+      type: 'FeatureCollection',
+      features: visibleFeatures,
+    }, {
+      style: {
+        color: '#8f98a8',
+        weight: 0,
+        opacity: 0,
+        fillColor: '#8f98a8',
+        fillOpacity: 0.26,
+        interactive: false,
+      },
+      pane: 'waterBodyPane',
+    }).addTo(map);
+  } catch {
+    // 水域データがなくてもプレイ可能。
+  }
 }
 
 async function addMunicipalityBorders() {

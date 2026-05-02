@@ -5,6 +5,7 @@
   "scripts": {
     "fetch-coords": "node scripts/fetch-coordinates.js",
     "fetch-borders": "node scripts/fetch-municipality-borders.js",
-    "fetch-prefecture-borders": "node scripts/fetch-prefecture-borders.js"
+    "fetch-prefecture-borders": "node scripts/fetch-prefecture-borders.js",
+    "fetch-water-bodies": "node scripts/fetch-water-bodies.js"
   }
 }

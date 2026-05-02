@@ -10,6 +10,7 @@
   - `data/municipalities.json` — 座標データ（`scripts/fetch-coordinates.js` で生成）
   - `data/municipality-borders.geojson` — 市区町村境界（`scripts/fetch-municipality-borders.js` で生成）
   - `data/prefecture-borders.geojson` — 都道府県境界（`scripts/fetch-prefecture-borders.js` で生成）
+  - `data/water-bodies.geojson` — 水域データ（`scripts/fetch-water-bodies.js` で生成）
 - フロント: 素の HTML/CSS/JS（フレームワークなし）
 - ホスティング: Vercel（`push` で自動デプロイ）
 
@@ -23,10 +24,12 @@ scripts/
   fetch-coordinates.js         座標データ生成
   fetch-municipality-borders.js 境界 GeoJSON 生成
   fetch-prefecture-borders.js   都道府県境界 GeoJSON 生成
+  fetch-water-bodies.js         水域 GeoJSON 生成
 data/
   municipalities.json          座標データ（Git 管理外）
   municipality-borders.geojson 境界データ（Git 管理外）
   prefecture-borders.geojson   都道府県境界データ
+  water-bodies.geojson         水域データ
 ```
 
 ## データ生成
@@ -35,6 +38,7 @@ data/
 npm run fetch-coords    # data/municipalities.json を生成
 npm run fetch-borders   # data/municipality-borders.geojson を生成
 npm run fetch-prefecture-borders  # data/prefecture-borders.geojson を生成
+npm run fetch-water-bodies  # data/water-bodies.geojson を生成
 ```
 
 ### fetch-coordinates.js
@@ -53,6 +57,12 @@ npm run fetch-prefecture-borders  # data/prefecture-borders.geojson を生成
 
 - GADM 4.1（`gadm41_JPN_1.json`）から GeoJSON をダウンロード
 - `data/prefecture-borders.geojson` に出力
+
+### fetch-water-bodies.js
+
+- OpenStreetMap Nominatim のポリゴン検索から主要湖を取得
+- `data/water-bodies.geojson` に出力
+- feature ごとの `defaultVisible` で初期表示可否を管理
 
 ## ゲーム設定（スタート画面）
 
@@ -84,12 +94,14 @@ npm run fetch-prefecture-borders  # data/prefecture-borders.geojson を生成
 
 | Pane | zIndex | 用途 |
 |------|--------|------|
+| `waterBodyPane` | 410 | 湖沼などの水域塗り |
 | `municipalityPane` | 420 | 市区町村境界線（細線） |
 | `prefectureHaloPane` | 425 | 都道府県境界の下地線 |
 | `prefecturePane` | 430 | 都道府県境界線（太線） |
 | `highlightPane` | 450 | 正解市区町村のハイライト |
 
 - 日本国外はグレーマスクで覆い、地図範囲を日本周辺に制限
+- 水域はローカルの `data/water-bodies.geojson` を使用
 - 都道府県境界はローカルの `data/prefecture-borders.geojson` を使用
 - 日本国外マスクは `dataofjapan/land` の `japan.geojson` を CDN から取得
 
