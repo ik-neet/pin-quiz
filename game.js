@@ -444,11 +444,11 @@ async function addWaterBodies() {
       features: visibleFeatures,
     }, {
       style: {
-        color: '#8f98a8',
+        color: '#7f8898',
         weight: 0,
         opacity: 0,
-        fillColor: '#8f98a8',
-        fillOpacity: 0.26,
+        fillColor: '#7f8898',
+        fillOpacity: 0.34,
         interactive: false,
       },
       pane: 'waterBodyPane',
@@ -528,7 +528,7 @@ async function addJapanMask() {
       type: 'Feature',
       geometry: { type: 'Polygon', coordinates: [world, ...japanRings] },
     }, {
-      style: { fillColor: '#8f98a8', fillOpacity: 0.26, weight: 0, interactive: false },
+      style: { fillColor: '#7f8898', fillOpacity: 0.34, weight: 0, interactive: false },
     }).addTo(map);
   } catch {
     // マスクがなくてもプレイ可能。
