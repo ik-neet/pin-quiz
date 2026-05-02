@@ -41,7 +41,7 @@ const DIFFICULTY_PRESETS = {
     showKana: true,
   },
   intermediate: {
-    showPrefecture: 'always',
+    showPrefecture: 'auto',
     timeLimit: 30,
     showKana: true,
   },
