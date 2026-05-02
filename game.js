@@ -30,7 +30,6 @@ let hintUsedThisRound = false;
 
 let settings = {
   rounds: 10,
-  showPrefecture: 'auto',
   timeLimit: 0,
   showKana: true,
   showHints: true,
@@ -44,7 +43,6 @@ const el = id => document.getElementById(id);
 const DIFFICULTY_PRESETS = {
   beginner: {
     rounds: 10,
-    showPrefecture: 'always',
     timeLimit: 0,
     showKana: true,
     showHints: true,
@@ -52,7 +50,6 @@ const DIFFICULTY_PRESETS = {
   },
   intermediate: {
     rounds: 10,
-    showPrefecture: 'auto',
     timeLimit: 30,
     showKana: true,
     showHints: true,
@@ -60,7 +57,6 @@ const DIFFICULTY_PRESETS = {
   },
   advanced: {
     rounds: 10,
-    showPrefecture: 'auto',
     timeLimit: 15,
     showKana: false,
     showHints: false,
@@ -158,7 +154,6 @@ function applyDifficultyPreset(difficulty) {
   }
 
   el('setting-rounds').value = String(preset.rounds);
-  el('setting-prefecture').value = preset.showPrefecture;
   el('setting-timelimit').value = String(preset.timeLimit);
   el('setting-kana').checked = preset.showKana;
   el('setting-hints').checked = preset.showHints;
@@ -171,7 +166,6 @@ function applyDifficultyPreset(difficulty) {
 function syncDifficultySelection() {
   const currentConfig = {
     rounds: Math.max(1, Math.min(30, parseInt(el('setting-rounds').value, 10) || 10)),
-    showPrefecture: el('setting-prefecture').value,
     timeLimit: Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0)),
     showKana: el('setting-kana').checked,
     showHints: el('setting-hints').checked,
@@ -180,7 +174,6 @@ function syncDifficultySelection() {
 
   const matchedDifficulty = Object.entries(DIFFICULTY_PRESETS).find(([, preset]) =>
     preset.rounds === currentConfig.rounds
-    && preset.showPrefecture === currentConfig.showPrefecture
     && preset.timeLimit === currentConfig.timeLimit
     && preset.showKana === currentConfig.showKana
     && preset.showHints === currentConfig.showHints
@@ -223,7 +216,7 @@ function init() {
   ['setting-rounds', 'setting-timelimit', 'setting-hintcount'].forEach(id => {
     el(id).addEventListener('input', updateRangeDisplays);
   });
-  ['setting-prefecture', 'setting-timelimit', 'setting-kana', 'setting-hints', 'setting-hintcount'].forEach(id => {
+  ['setting-timelimit', 'setting-kana', 'setting-hints', 'setting-hintcount'].forEach(id => {
     ['input', 'change'].forEach(eventName => {
       el(id).addEventListener(eventName, syncDifficultySelection);
     });
@@ -235,7 +228,6 @@ function init() {
 
 function onStartGame() {
   settings.rounds = Math.max(1, Math.min(30, parseInt(el('setting-rounds').value, 10) || 10));
-  settings.showPrefecture = el('setting-prefecture').value;
   settings.timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
   settings.showKana = el('setting-kana').checked;
   settings.showHints = el('setting-hints').checked;
@@ -483,8 +475,7 @@ function startRound() {
   el('current-round').textContent = round;
   el('municipality-name').innerHTML = formatMunicipalityName(current.name, current.nameKana);
 
-  const alwaysShow = settings.showPrefecture === 'always';
-  el('prefecture-hint').textContent = (alwaysShow || duplicateNames.has(current.name)) ? current.prefecture : '';
+  el('prefecture-hint').textContent = duplicateNames.has(current.name) ? current.prefecture : '';
 
   pendingLat = null;
   pendingLng = null;
