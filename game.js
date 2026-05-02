@@ -4,6 +4,7 @@ const JAPAN_CENTER = [36.5, 136.0];
 const JAPAN_ZOOM = 5;
 const PREFECTURE_GEOJSON_URL = './data/prefecture-borders.geojson';
 const JAPAN_MASK_GEOJSON_URL = 'https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson';
+const WHITE_TILE_DATA_URL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 const SCORE_BREAKS = [
   [20, 9], [50, 8], [100, 7],
   [200, 5], [400, 3], [700, 1], [Infinity, 0],
@@ -393,9 +394,8 @@ function initMap() {
     maxBoundsViscosity: 1.0,
   });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/positron_nolabels/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
+  L.tileLayer(WHITE_TILE_DATA_URL, {
+    attribution: '',
     maxZoom: 19,
   }).addTo(map);
 
