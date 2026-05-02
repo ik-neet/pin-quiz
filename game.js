@@ -2,6 +2,7 @@
 
 const JAPAN_CENTER = [36.5, 136.0];
 const JAPAN_ZOOM = 5;
+const PREFECTURE_GEOJSON_URL = 'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_JPN_1.json';
 const SCORE_BREAKS = [
   [20, 9], [50, 8], [100, 7],
   [200, 5], [400, 3], [700, 1], [Infinity, 0],
@@ -330,7 +331,7 @@ async function loadBoundaryData() {
 
 async function loadPrefectureData() {
   try {
-    prefectureGeojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson')
+    prefectureGeojson = await fetch(PREFECTURE_GEOJSON_URL)
       .then(response => response.json());
     prefectureIndex = buildPrefectureIndex(prefectureGeojson);
   } catch {
@@ -438,7 +439,7 @@ async function addMunicipalityBorders() {
 async function addPrefectureBorders() {
   try {
     if (!prefectureGeojson) {
-      prefectureGeojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson').then(response => response.json());
+      prefectureGeojson = await fetch(PREFECTURE_GEOJSON_URL).then(response => response.json());
       prefectureIndex = buildPrefectureIndex(prefectureGeojson);
     }
     L.geoJSON(prefectureGeojson, {
@@ -458,10 +459,13 @@ async function addPrefectureBorders() {
 
 async function addJapanMask() {
   try {
-    const geojson = await fetch('https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson').then(response => response.json());
+    if (!prefectureGeojson) {
+      prefectureGeojson = await fetch(PREFECTURE_GEOJSON_URL).then(response => response.json());
+      prefectureIndex = buildPrefectureIndex(prefectureGeojson);
+    }
     const japanRings = [];
 
-    for (const feature of geojson.features) {
+    for (const feature of prefectureGeojson.features || []) {
       const geometry = feature.geometry;
       if (geometry.type === 'Polygon') {
         japanRings.push(geometry.coordinates[0].slice().reverse());

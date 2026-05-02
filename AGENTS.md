@@ -80,7 +80,7 @@ npm run fetch-borders   # data/municipality-borders.geojson を生成
 | `highlightPane` | 450 | 正解市区町村のハイライト |
 
 - 日本国外はグレーマスクで覆い、地図範囲を日本周辺に制限
-- 都道府県境界・マスクは `dataofjapan/land` の `japan.geojson` を CDN から取得
+- 都道府県境界・マスクは GADM 4.1 の `gadm41_JPN_1.json` を CDN から取得
 
 ## Vercel 設定
 
