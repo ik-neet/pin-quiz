@@ -452,7 +452,7 @@ function getDifficultyLabel(difficulty = settings.difficulty) {
 }
 
 function buildShareText() {
-  return `日本市区町村 位置当てゲームで${getDifficultyLabel()}・${totalScore} / ${settings.rounds * 10}点を獲得しました。`;
+  return `日本市区町村 位置当てゲーム（難易度：${getDifficultyLabel()}）${totalScore} / ${settings.rounds * 10}点を獲得しました！あなたも挑戦してみませんか？`;
 }
 
 function shareOnX() {
