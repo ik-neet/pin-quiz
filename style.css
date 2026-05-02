@@ -562,7 +562,7 @@ body {
   padding: 44px 60px;
   text-align: center;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
-  max-width: 360px;
+  max-width: 420px;
   width: 90%;
 }
 
@@ -602,10 +602,11 @@ body {
   background: var(--bg-deep);
   color: white;
   border: none;
-  padding: 14px 36px;
+  padding: 12px 24px;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
+  white-space: nowrap;
   transition: background 0.2s, transform 0.1s;
 }
 
