@@ -437,6 +437,36 @@ function returnToSettings() {
   el('start-screen').classList.remove('hidden');
 }
 
+function buildShareText() {
+  return `日本市区町村 位置当てゲームで ${totalScore} / ${settings.rounds * 10} 点を獲得しました。`;
+}
+
+async function shareResult() {
+  const text = buildShareText();
+  const shareUrl = window.location.href;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: '日本市区町村 位置当てゲーム',
+        text,
+        url: shareUrl,
+      });
+      return;
+    } catch (error) {
+      if (error && error.name === 'AbortError') {
+        return;
+      }
+    }
+  }
+
+  window.open(
+    `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
+    '_blank',
+    'noopener,noreferrer'
+  );
+}
+
 function startRound() {
   round += 1;
   answered = false;
@@ -666,18 +696,18 @@ function showGameOver() {
   el('result-panel').classList.add('hidden');
 
   const max = settings.rounds * 10;
-  const pct = Math.round((totalScore / max) * 100);
   const messages = [
     [90, '地理マスター！'],
     [70, 'かなり詳しいです'],
     [50, 'まずまずです'],
     [0, '伸びしろたっぷり'],
   ];
+  const pct = Math.round((totalScore / max) * 100);
   const message = messages.find(([threshold]) => pct >= threshold)[1];
 
   el('final-msg').textContent = message;
   el('final-score').textContent = `${totalScore} / ${max}`;
-  el('final-pct').textContent = `正答率 ${pct}%`;
+  el('share-btn').onclick = shareResult;
   el('back-to-settings-btn').onclick = returnToSettings;
   el('restart-btn').onclick = startNewGame;
   el('game-over').classList.remove('hidden');

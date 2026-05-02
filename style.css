@@ -580,13 +580,7 @@ body {
   line-height: 1;
 }
 
-#final-pct {
-  font-size: 15px;
-  color: #888;
-  margin-top: 6px;
-  margin-bottom: 28px;
-}
-
+#share-btn,
 #game-over-card .secondary-action,
 #restart-btn {
   background: var(--bg-deep);
@@ -597,6 +591,21 @@ body {
   font-size: 16px;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
+}
+
+#share-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+}
+
+#share-btn:hover {
+  filter: brightness(1.06);
+}
+
+#share-btn:active {
+  transform: scale(0.97);
 }
 
 #game-over-card .secondary-action {
