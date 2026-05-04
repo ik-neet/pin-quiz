@@ -514,6 +514,27 @@ body {
   letter-spacing: 0.04em;
 }
 
+#result-adjacent-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 6px;
+  padding: 5px 12px;
+  border: 1px solid #f4b400;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff6cc 0%, #ffe08a 100%);
+  color: #7a4b00;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 6px 14px rgba(244, 180, 0, 0.18);
+  white-space: nowrap;
+}
+
+#result-adjacent-badge.hidden {
+  display: none;
+}
+
 #result-guess {
   font-size: 13px;
   color: #444;

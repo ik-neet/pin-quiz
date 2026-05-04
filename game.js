@@ -904,11 +904,12 @@ function revealResult(guessLat, guessLng) {
   let dist = 0;
   let pts = 0;
   let inBoundary = false;
+  let isAdjacent = false;
   let isPerfectHit = false;
 
   if (!isTimeout) {
     dist = haversine(guessLat, guessLng, current.lat, current.lng);
-    ({ pts, inBoundary } = calcPoints(dist, guessLat, guessLng));
+    ({ pts, inBoundary, isAdjacent } = calcPoints(dist, guessLat, guessLng));
     isPerfectHit = inBoundary;
   }
 
@@ -1011,6 +1012,7 @@ function revealResult(guessLat, guessLng) {
       : `${Math.round(dist).toLocaleString()} km`;
     el('result-distance').textContent = `距離: ${distLabel}`;
   }
+  el('result-adjacent-badge').classList.toggle('hidden', !isAdjacent);
 
   el('result-label').innerHTML = formatResultEntityLabel(
     '正解',
@@ -1069,13 +1071,13 @@ function calcPoints(distKm, guessLat, guessLng) {
   const answerFeature = boundaryIndex && current ? getBoundaryFeatureForMunicipality(current) : null;
   if (answerFeature) {
     if (pointInFeature([guessLng, guessLat], answerFeature)) {
-      return { pts: 10, inBoundary: true };
+      return { pts: 10, inBoundary: true, isAdjacent: false };
     }
   }
 
   const guessedMunicipalityFeature = findMunicipalityFeatureAt(guessLng, guessLat);
   if (answerFeature && guessedMunicipalityFeature && featuresAreAdjacent(answerFeature, guessedMunicipalityFeature)) {
-    return { pts: 9, inBoundary: false };
+    return { pts: 9, inBoundary: false, isAdjacent: true };
   }
 
   const guessedPrefectureFeature = guessedMunicipalityFeature || findPrefectureFeatureAt(guessLng, guessLat);
@@ -1087,11 +1089,11 @@ function calcPoints(distKm, guessLat, guessLng) {
       const adjustedPoints = guessedPrefecture && guessedPrefecture === answerPrefecture
         ? Math.max(5, pts)
         : pts;
-      return { pts: adjustedPoints, inBoundary: false };
+      return { pts: adjustedPoints, inBoundary: false, isAdjacent: false };
     }
   }
 
-  return { pts: 0, inBoundary: false };
+  return { pts: 0, inBoundary: false, isAdjacent: false };
 }
 
 function findMunicipalityAt(lng, lat) {
