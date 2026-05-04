@@ -436,6 +436,10 @@ function isWaterBodyVisible(feature) {
   return feature?.properties?.defaultVisible !== false;
 }
 
+function shouldEnableDoubleTapZoom() {
+  return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+}
+
 function initMap() {
   map = L.map('map', {
     center: JAPAN_CENTER,
@@ -443,6 +447,7 @@ function initMap() {
     minZoom: JAPAN_ZOOM,
     maxBounds: [[22, 120], [47, 150]],
     maxBoundsViscosity: 1.0,
+    doubleClickZoom: shouldEnableDoubleTapZoom(),
   });
 
   map.createPane('municipalityPane');
