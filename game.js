@@ -840,7 +840,7 @@ function revealResult(guessLat, guessLng) {
   answerMarker = L.marker([current.lat, current.lng], { icon: pinIcon('pin-answer') })
     .addTo(map)
     .bindTooltip(
-      formatMapMunicipalityLabel('正解', current.prefecture, formatMunicipalityName(current.name, current.nameKana)),
+      formatMapMunicipalityLabel('正解', current.prefecture, formatMunicipalityName(current.name, current.nameKana, false)),
       {
         permanent: true,
         direction: 'top',
@@ -880,7 +880,7 @@ function revealResult(guessLat, guessLng) {
   el('result-label').innerHTML = formatResultEntityLabel(
     '正解',
     current.prefecture,
-    formatMunicipalityName(current.name, current.nameKana)
+    formatMunicipalityName(current.name, current.nameKana, false)
   );
   el('result-points').textContent = `+${pts}`;
   el('result-points').dataset.level = pts >= 8 ? 'high' : pts >= 5 ? 'mid' : pts >= 1 ? 'low' : 'zero';
@@ -890,7 +890,7 @@ function revealResult(guessLat, guessLng) {
   el('next-btn').onclick = isLast ? showGameOver : startRound;
 
   el('result-panel').classList.remove('hidden');
-  el('instruction').innerHTML = formatAnswerLabel(current.prefecture, current.name, current.nameKana);
+  el('instruction').innerHTML = formatAnswerLabel(current.prefecture, current.name, current.nameKana, false);
 }
 
 function showGameOver() {
