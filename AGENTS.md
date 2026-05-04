@@ -84,8 +84,7 @@ npm run fetch-water-bodies  # data/water-bodies.geojson を生成
 
 | 距離 | 点数 |
 |------|------|
-| 0〜20 km | 9点 |
-| 20〜40 km | 8点 |
+| 0〜40 km | 8点 |
 | 40〜70 km | 7点 |
 | 70〜100 km | 6点 |
 | 100〜150 km | 5点 |
@@ -94,6 +93,8 @@ npm run fetch-water-bodies  # data/water-bodies.geojson を生成
 | 300〜400 km | 2点 |
 | 400〜500 km | 1点 |
 | 500 km〜 | 0点 |
+
+クリック点が含まれる市区町村が正解市区町村と隣接している場合は、境界外でも 9 点を獲得。
 
 クリック点が正解と同じ都道府県内にある場合は、境界外でも最低 5 点を獲得。
 

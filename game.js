@@ -10,7 +10,7 @@ const MOBILE_DOUBLE_TAP_DISTANCE_THRESHOLD = 24;
 const RESULT_REVEAL_MAX_ZOOM = 10;
 const PREFECTURE_HINT_MIN_ZOOM = 8;
 const SCORE_BREAKS = [
-  [20, 9], [40, 8], [70, 7], [100, 6],
+  [40, 8], [70, 7], [100, 6],
   [150, 5], [220, 4], [300, 3], [400, 2], [500, 1], [Infinity, 0],
 ];
 const WATER_BODY_VISIBILITY_OVERRIDES = {};
@@ -36,6 +36,7 @@ let duplicateNames = new Set();
 let prefectureGeojson = null;
 let prefectureIndex = null;
 let waterBodiesLayer = null;
+let municipalityAdjacencyCache = new Map();
 let hintsRemaining = 0;
 let hintUsedThisRound = false;
 let selectedDifficulty = 'beginner';
@@ -1065,14 +1066,18 @@ function showGameOver() {
 }
 
 function calcPoints(distKm, guessLat, guessLng) {
-  if (boundaryIndex && current) {
-    const feature = getBoundaryFeatureForMunicipality(current);
-    if (feature && pointInFeature([guessLng, guessLat], feature)) {
+  const answerFeature = boundaryIndex && current ? getBoundaryFeatureForMunicipality(current) : null;
+  if (answerFeature) {
+    if (pointInFeature([guessLng, guessLat], answerFeature)) {
       return { pts: 10, inBoundary: true };
     }
   }
 
   const guessedMunicipalityFeature = findMunicipalityFeatureAt(guessLng, guessLat);
+  if (answerFeature && guessedMunicipalityFeature && featuresAreAdjacent(answerFeature, guessedMunicipalityFeature)) {
+    return { pts: 9, inBoundary: false };
+  }
+
   const guessedPrefectureFeature = guessedMunicipalityFeature || findPrefectureFeatureAt(guessLng, guessLat);
   const guessedPrefecture = normalizePrefectureName(getFeaturePrefecture(guessedPrefectureFeature));
   const answerPrefecture = normalizePrefectureName(current?.prefecture || '');
@@ -1097,6 +1102,143 @@ function findMunicipalityAt(lng, lat) {
 function findPrefectureFeatureAt(lng, lat) {
   const features = prefectureGeojson?.features || [];
   return features.find(feature => pointInFeature([lng, lat], feature)) || null;
+}
+
+function featuresAreAdjacent(featureA, featureB) {
+  if (!featureA || !featureB || featureA === featureB) {
+    return false;
+  }
+
+  const cacheKey = createAdjacencyCacheKey(featureA, featureB);
+  if (municipalityAdjacencyCache.has(cacheKey)) {
+    return municipalityAdjacencyCache.get(cacheKey);
+  }
+
+  const polygonsA = extractFeaturePolygons(featureA);
+  const polygonsB = extractFeaturePolygons(featureB);
+  const isAdjacent = polygonsA.some(polygonA =>
+    polygonsB.some(polygonB => polygonsAreAdjacent(polygonA, polygonB))
+  );
+
+  municipalityAdjacencyCache.set(cacheKey, isAdjacent);
+  return isAdjacent;
+}
+
+function createAdjacencyCacheKey(featureA, featureB) {
+  const keyA = getFeatureAdjacencyKey(featureA);
+  const keyB = getFeatureAdjacencyKey(featureB);
+  return keyA < keyB ? `${keyA}||${keyB}` : `${keyB}||${keyA}`;
+}
+
+function getFeatureAdjacencyKey(feature) {
+  const prefecture = getFeaturePrefecture(feature);
+  const municipality = getFeatureMunicipalityName(feature);
+  const gid = feature?.properties?.GID_2 || '';
+  return `${prefecture}::${municipality}::${gid}`;
+}
+
+function extractFeaturePolygons(feature) {
+  const geometry = feature?.geometry;
+  if (!geometry) {
+    return [];
+  }
+  if (geometry.type === 'Polygon') {
+    return [geometry.coordinates];
+  }
+  if (geometry.type === 'MultiPolygon') {
+    return geometry.coordinates;
+  }
+  return [];
+}
+
+function polygonsAreAdjacent(polygonA, polygonB) {
+  if (!polygonA?.length || !polygonB?.length) {
+    return false;
+  }
+  if (!ringsBoundsOverlap(polygonA[0], polygonB[0])) {
+    return false;
+  }
+
+  return polygonA.some(ringA => polygonB.some(ringB => ringsTouch(ringA, ringB)));
+}
+
+function ringsBoundsOverlap(ringA, ringB) {
+  const boundsA = getRingBounds(ringA);
+  const boundsB = getRingBounds(ringB);
+  const epsilon = 1e-9;
+  return !(
+    boundsA.maxX < boundsB.minX - epsilon
+    || boundsB.maxX < boundsA.minX - epsilon
+    || boundsA.maxY < boundsB.minY - epsilon
+    || boundsB.maxY < boundsA.minY - epsilon
+  );
+}
+
+function getRingBounds(ring) {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  for (const [x, y] of ring) {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  }
+
+  return { minX, maxX, minY, maxY };
+}
+
+function ringsTouch(ringA, ringB) {
+  for (let i = 0; i < ringA.length - 1; i += 1) {
+    const segmentAStart = ringA[i];
+    const segmentAEnd = ringA[i + 1];
+    for (let j = 0; j < ringB.length - 1; j += 1) {
+      const segmentBStart = ringB[j];
+      const segmentBEnd = ringB[j + 1];
+      if (segmentsTouch(segmentAStart, segmentAEnd, segmentBStart, segmentBEnd)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function segmentsTouch(startA, endA, startB, endB) {
+  const epsilon = 1e-9;
+  const orientation1 = orientation(startA, endA, startB);
+  const orientation2 = orientation(startA, endA, endB);
+  const orientation3 = orientation(startB, endB, startA);
+  const orientation4 = orientation(startB, endB, endA);
+
+  if (
+    ((orientation1 > epsilon && orientation2 < -epsilon) || (orientation1 < -epsilon && orientation2 > epsilon))
+    && ((orientation3 > epsilon && orientation4 < -epsilon) || (orientation3 < -epsilon && orientation4 > epsilon))
+  ) {
+    return true;
+  }
+
+  return (
+    (Math.abs(orientation1) <= epsilon && pointOnSegment(startA, startB, endA))
+    || (Math.abs(orientation2) <= epsilon && pointOnSegment(startA, endB, endA))
+    || (Math.abs(orientation3) <= epsilon && pointOnSegment(startB, startA, endB))
+    || (Math.abs(orientation4) <= epsilon && pointOnSegment(startB, endA, endB))
+  );
+}
+
+function orientation(start, mid, end) {
+  return (mid[0] - start[0]) * (end[1] - start[1]) - (mid[1] - start[1]) * (end[0] - start[0]);
+}
+
+function pointOnSegment(start, point, end) {
+  const epsilon = 1e-9;
+  return (
+    point[0] <= Math.max(start[0], end[0]) + epsilon
+    && point[0] >= Math.min(start[0], end[0]) - epsilon
+    && point[1] <= Math.max(start[1], end[1]) + epsilon
+    && point[1] >= Math.min(start[1], end[1]) - epsilon
+  );
 }
 
 function pointInFeature(point, feature) {
