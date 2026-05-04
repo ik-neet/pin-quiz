@@ -3,6 +3,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { mergePrefectureGeometryFromSupplements } = require('./boundary-supplements');
 
 const DOWNLOAD_URL = 'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_JPN_1.json';
 const OUTPUT = path.join(__dirname, '../data/prefecture-borders.geojson');
@@ -45,6 +46,9 @@ async function main() {
   console.log('GADM Japan ADM1 (都道府県境界) をダウンロード中...');
   console.log(`  URL: ${DOWNLOAD_URL}`);
   await download(DOWNLOAD_URL, OUTPUT);
+  const geojson = JSON.parse(fs.readFileSync(OUTPUT, 'utf8'));
+  mergePrefectureGeometryFromSupplements(geojson);
+  fs.writeFileSync(OUTPUT, JSON.stringify(geojson));
   const stat = fs.statSync(OUTPUT);
   console.log(`完了: ${OUTPUT} (${(stat.size / 1024 / 1024).toFixed(1)} MB)`);
 }

@@ -9,6 +9,7 @@
 - データ:
   - `data/municipalities.json` — 座標データ（`scripts/fetch-coordinates.js` で生成）
   - `data/municipality-borders.geojson` — 市区町村境界（`scripts/fetch-municipality-borders.js` で生成）
+  - `data/municipality-boundary-supplements.geojson` — GADM 欠落分の市区町村境界補完
   - `data/prefecture-borders.geojson` — 都道府県境界（`scripts/fetch-prefecture-borders.js` で生成）
   - `data/water-bodies.geojson` — 水域データ（`scripts/fetch-water-bodies.js` で生成）
 - フロント: 素の HTML/CSS/JS（フレームワークなし）
@@ -28,6 +29,7 @@ scripts/
 data/
   municipalities.json          座標データ（Git 管理外）
   municipality-borders.geojson 境界データ（Git 管理外）
+  municipality-boundary-supplements.geojson 境界補完データ
   prefecture-borders.geojson   都道府県境界データ
   water-bodies.geojson         水域データ
 ```
@@ -50,12 +52,14 @@ npm run fetch-water-bodies  # data/water-bodies.geojson を生成
 ### fetch-municipality-borders.js
 
 - GADM 4.1（`gadm41_JPN_2.json`）から GeoJSON をダウンロード
+- `municipality-boundary-supplements.geojson` をマージして欠落境界を補完
 - `data/municipality-borders.geojson` に出力
 - ファイルサイズが大きいためリダイレクト対応済み
 
 ### fetch-prefecture-borders.js
 
 - GADM 4.1（`gadm41_JPN_1.json`）から GeoJSON をダウンロード
+- `municipality-boundary-supplements.geojson` を使って飛び地の県境を補完
 - `data/prefecture-borders.geojson` に出力
 
 ### fetch-water-bodies.js

@@ -3,6 +3,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { mergeMunicipalitySupplements } = require('./boundary-supplements');
 
 const DOWNLOAD_URL = 'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_JPN_2.json';
 const OUTPUT = path.join(__dirname, '../data/municipality-borders.geojson');
@@ -61,6 +62,7 @@ async function main() {
       feature.properties.NL_NAME_2 = fixedName;
     }
   }
+  mergeMunicipalitySupplements(geojson);
   fs.writeFileSync(OUTPUT, JSON.stringify(geojson));
   const stat = fs.statSync(OUTPUT);
   console.log(`完了: ${OUTPUT} (${(stat.size / 1024 / 1024).toFixed(1)} MB)`);
