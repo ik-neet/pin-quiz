@@ -526,7 +526,7 @@ function initMap() {
     center: JAPAN_CENTER,
     zoom: JAPAN_ZOOM,
     minZoom: JAPAN_ZOOM,
-    maxZoom: 9,
+    maxZoom: 11,
     maxBounds: [[22, 120], [47, 150]],
     maxBoundsViscosity: 1.0,
     doubleClickZoom: !shouldEnableDoubleTapZoom(),
@@ -964,9 +964,9 @@ function revealResult(guessLat, guessLng) {
 
   if (!isTimeout) {
     const bounds = L.latLngBounds([[guessLat, guessLng], [current.lat, current.lng]]);
-    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 10 });
+    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 11 });
   } else {
-    map.setView([current.lat, current.lng], 9, { animate: true });
+    map.setView([current.lat, current.lng], 11, { animate: true });
   }
 
   el('total-score').textContent = totalScore;
