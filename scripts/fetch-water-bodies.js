@@ -14,9 +14,18 @@ const WATER_BODIES = [
   { id: 'lake-nakaumi', name: '中海', query: 'Nakaumi, Japan', kind: 'lake', defaultVisible: true },
   { id: 'lake-shinji', name: '宍道湖', query: 'Lake Shinji, Japan', kind: 'lake', defaultVisible: true },
   { id: 'lake-hamana', name: '浜名湖', query: 'Lake Hamana, Japan', kind: 'lake', defaultVisible: true },
-  { id: 'lake-kussharo', name: '屈斜路湖', query: 'Lake Kussharo, Japan', kind: 'lake', defaultVisible: false },
-  { id: 'lake-shikotsu', name: '支笏湖', query: 'Lake Shikotsu, Japan', kind: 'lake', defaultVisible: false },
-  { id: 'lake-toya', name: '洞爺湖', query: 'Lake Toya, Japan', kind: 'lake', defaultVisible: false },
+  { id: 'lake-furen', name: '風蓮湖', query: '風蓮湖, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-ogawara', name: '小川原湖', query: '小川原湖, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-towada', name: '十和田湖', query: '十和田湖, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-notoro', name: '能取湖', query: '能取湖, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-kitaura', name: '北浦', query: 'Lake Kitaura, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-akkeshi', name: '厚岸湖', query: '厚岸湖, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-abashiri', name: '網走湖', query: '網走湖, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-hachirogata', name: '八郎潟調整池', query: '八郎潟調整池, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-tazawa', name: '田沢湖', query: '田沢湖, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-kussharo', name: '屈斜路湖', query: 'Lake Kussharo, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-shikotsu', name: '支笏湖', query: 'Lake Shikotsu, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-toya', name: '洞爺湖', query: 'Lake Toya, Japan', kind: 'lake', defaultVisible: true },
 ];
 
 function fetchJson(url) {
