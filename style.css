@@ -769,20 +769,63 @@ body {
 .pin-guess  { background: var(--danger); }
 .pin-answer { background: var(--success); }
 
-.selected-municipality-tooltip {
-  background: rgba(37, 99, 235, 0.94);
+.map-municipality-tooltip {
   border: none;
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
   color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 6px 10px;
+  padding: 0;
   white-space: nowrap;
 }
 
-.selected-municipality-tooltip::before {
+.map-municipality-tooltip::before {
   display: none;
+}
+
+.map-municipality-tooltip-selected {
+  background: rgba(37, 99, 235, 0.94);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
+}
+
+.map-municipality-tooltip-answer {
+  background: rgba(39, 174, 96, 0.94);
+  box-shadow: 0 6px 18px rgba(39, 174, 96, 0.28);
+}
+
+.map-entity {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.map-entity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.map-entity-body {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.map-entity-body .name-stack {
+  align-items: flex-start;
+}
+
+.map-entity-body .name-ruby {
+  color: rgba(255, 255, 255, 0.82);
 }
 
 @media (max-width: 640px) {

@@ -146,6 +146,10 @@ function formatResultEntityLabel(label, prefecture, municipalityHtml) {
   return `<span class="result-entity"><span class="result-entity-badge">${escapeHtml(label)}</span><span class="result-entity-body">${escapeHtml(prefecture)} ${municipalityHtml}</span></span>`;
 }
 
+function formatMapMunicipalityLabel(label, prefecture, municipalityHtml) {
+  return `<span class="map-entity"><span class="map-entity-badge">${escapeHtml(label)}</span><span class="map-entity-body">${escapeHtml(prefecture)} ${municipalityHtml}</span></span>`;
+}
+
 function createMunicipalityKey(prefecture, name) {
   return `${prefecture}::${name}`;
 }
@@ -781,12 +785,12 @@ function revealResult(guessLat, guessLng) {
   totalScore += pts;
   const guessedFeature = !isTimeout ? findMunicipalityFeatureAt(guessLng, guessLat) : null;
   const answerFeature = boundaryIndex ? getBoundaryFeatureForMunicipality(current) : null;
+  const guessedName = guessedFeature?.properties?.NL_NAME_2 || guessedFeature?.properties?.NAME_2 || '';
+  const guessedPrefecture = guessedFeature?.properties?.NL_NAME_1 || guessedFeature?.properties?.NAME_1 || '';
 
   if (isTimeout) {
     el('result-guess').textContent = '時間切れ';
   } else {
-    const guessedName = guessedFeature?.properties?.NL_NAME_2 || guessedFeature?.properties?.NAME_2 || '';
-    const guessedPrefecture = guessedFeature?.properties?.NL_NAME_1 || guessedFeature?.properties?.NAME_1 || '';
     el('result-guess').innerHTML = guessedFeature
       ? formatResultEntityLabel('選択市町村', guessedPrefecture, escapeHtml(guessedName))
       : '<span class="result-entity"><span class="result-entity-badge">選択地点</span><span class="result-entity-body">市町村境界の外</span></span>';
@@ -808,11 +812,13 @@ function revealResult(guessLat, guessLng) {
     }).addTo(map);
 
     if (guessMarker) {
-      guessMarker.bindTooltip(`選択: ${formatFeatureMunicipalityLabel(guessedFeature)}`, {
+      guessMarker.bindTooltip(
+        formatMapMunicipalityLabel('選択', guessedPrefecture, escapeHtml(guessedName)),
+        {
         permanent: true,
         direction: 'top',
         offset: [0, -22],
-        className: 'selected-municipality-tooltip',
+        className: 'map-municipality-tooltip map-municipality-tooltip-selected',
       }).openTooltip();
     }
   }
@@ -833,8 +839,16 @@ function revealResult(guessLat, guessLng) {
 
   answerMarker = L.marker([current.lat, current.lng], { icon: pinIcon('pin-answer') })
     .addTo(map)
-    .bindPopup(`<b>${escapeHtml(current.prefecture)}</b><br>${formatMunicipalityName(current.name, current.nameKana)}`)
-    .openPopup();
+    .bindTooltip(
+      formatMapMunicipalityLabel('正解', current.prefecture, formatMunicipalityName(current.name, current.nameKana)),
+      {
+        permanent: true,
+        direction: 'top',
+        offset: [0, -22],
+        className: 'map-municipality-tooltip map-municipality-tooltip-answer',
+      }
+    )
+    .openTooltip();
 
   if (!isTimeout && !inBoundary) {
     connLine = L.polyline(
