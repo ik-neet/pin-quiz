@@ -142,6 +142,10 @@ function formatAnswerLabel(prefecture, name, kana, showKana = settings.showKana)
   return `正解: ${escapeHtml(prefecture)} ${formatMunicipalityName(name, kana, showKana)}`;
 }
 
+function formatResultEntityLabel(label, prefecture, municipalityHtml) {
+  return `<span class="result-entity"><span class="result-entity-badge">${escapeHtml(label)}</span><span class="result-entity-body">${escapeHtml(prefecture)} ${municipalityHtml}</span></span>`;
+}
+
 function createMunicipalityKey(prefecture, name) {
   return `${prefecture}::${name}`;
 }
@@ -781,8 +785,11 @@ function revealResult(guessLat, guessLng) {
   if (isTimeout) {
     el('result-guess').textContent = '時間切れ';
   } else {
-    const guessedName = guessedFeature ? formatFeatureMunicipalityLabel(guessedFeature) : null;
-    el('result-guess').textContent = guessedName ? `選択市町村: ${guessedName}` : '選択地点: 市町村境界の外';
+    const guessedName = guessedFeature?.properties?.NL_NAME_2 || guessedFeature?.properties?.NAME_2 || '';
+    const guessedPrefecture = guessedFeature?.properties?.NL_NAME_1 || guessedFeature?.properties?.NAME_1 || '';
+    el('result-guess').innerHTML = guessedFeature
+      ? formatResultEntityLabel('選択市町村', guessedPrefecture, escapeHtml(guessedName))
+      : '<span class="result-entity"><span class="result-entity-badge">選択地点</span><span class="result-entity-body">市町村境界の外</span></span>';
   }
 
   if (guessedFeature) {
@@ -856,7 +863,11 @@ function revealResult(guessLat, guessLng) {
     el('result-distance').textContent = `距離: ${distLabel}`;
   }
 
-  el('result-label').innerHTML = formatAnswerLabel(current.prefecture, current.name, current.nameKana);
+  el('result-label').innerHTML = formatResultEntityLabel(
+    '正解',
+    current.prefecture,
+    formatMunicipalityName(current.name, current.nameKana)
+  );
   el('result-points').textContent = `+${pts}`;
   el('result-points').dataset.level = pts >= 8 ? 'high' : pts >= 5 ? 'mid' : pts >= 1 ? 'low' : 'zero';
 

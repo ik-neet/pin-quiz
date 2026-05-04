@@ -499,9 +499,45 @@ body {
   margin-top: 2px;
 }
 
-#result-label .name-stack {
-  margin-left: 2px;
+#result-guess,
+#result-label {
+  line-height: 1.45;
+}
+
+.result-entity {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.result-entity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(40, 52, 95, 0.08);
+  color: var(--bg-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.result-entity-body {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  color: #33415c;
+  font-weight: 700;
+}
+
+.result-entity-body .name-stack {
+  margin-left: 0;
   vertical-align: top;
+  align-items: flex-start;
 }
 
 #instruction .name-stack {
