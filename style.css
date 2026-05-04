@@ -39,6 +39,8 @@ body {
   justify-content: center;
   z-index: 9999;
   padding: 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #start-screen.hidden { display: none; }
@@ -52,6 +54,8 @@ body {
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
   max-width: 720px;
   width: min(100%, 720px);
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
   backdrop-filter: blur(14px);
 }
 
@@ -747,11 +751,14 @@ body {
 
 @media (max-width: 640px) {
   #start-screen {
-    padding: 16px;
+    align-items: flex-start;
+    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
   }
 
   #start-card {
-    padding: 28px 18px 24px;
+    width: 100%;
+    max-height: calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    padding: 24px 16px 20px;
     border-radius: 22px;
   }
 
