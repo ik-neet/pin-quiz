@@ -7,6 +7,8 @@ const JAPAN_MASK_GEOJSON_URL = 'https://raw.githubusercontent.com/dataofjapan/la
 const WATER_BODIES_GEOJSON_URL = './data/water-bodies.geojson';
 const MOBILE_TAP_CONFIRM_DELAY_MS = 200;
 const MOBILE_DOUBLE_TAP_DISTANCE_THRESHOLD = 24;
+const RESULT_REVEAL_MAX_ZOOM = 10;
+const PREFECTURE_HINT_MIN_ZOOM = 8;
 const SCORE_BREAKS = [
   [20, 9], [50, 8], [100, 7],
   [200, 5], [400, 3], [700, 1], [Infinity, 0],
@@ -865,6 +867,16 @@ function onUseHint() {
     pane: 'prefectureHintPane',
   }).addTo(map);
 
+  const hintBounds = prefectureHintLayer.getBounds();
+  if (hintBounds.isValid()) {
+    const hintZoom = Math.min(
+      map.getBoundsZoom(hintBounds.pad(0.25)),
+      PREFECTURE_HINT_MIN_ZOOM
+    );
+    const nextZoom = Math.max(map.getZoom(), hintZoom);
+    map.setView(hintBounds.getCenter(), nextZoom, { animate: true });
+  }
+
   hintsRemaining -= 1;
   hintUsedThisRound = true;
   updateHintButton();
@@ -964,9 +976,9 @@ function revealResult(guessLat, guessLng) {
 
   if (!isTimeout) {
     const bounds = L.latLngBounds([[guessLat, guessLng], [current.lat, current.lng]]);
-    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 11 });
+    map.fitBounds(bounds, { padding: [80, 80], maxZoom: RESULT_REVEAL_MAX_ZOOM });
   } else {
-    map.setView([current.lat, current.lng], 11, { animate: true });
+    map.setView([current.lat, current.lng], RESULT_REVEAL_MAX_ZOOM, { animate: true });
   }
 
   el('total-score').textContent = totalScore;
