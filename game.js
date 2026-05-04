@@ -59,6 +59,7 @@ const DIFFICULTY_LABELS = {
 
 const BOUNDARY_NAME_FIXES = {
   '高知県::ShimantoCity': '四万十市',
+  '北海道::EsashiCapital': '江差町',
 };
 const DIFFICULTY_PRESETS = {
   beginner: {

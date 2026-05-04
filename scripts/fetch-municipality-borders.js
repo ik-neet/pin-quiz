@@ -8,6 +8,7 @@ const DOWNLOAD_URL = 'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_JPN_2
 const OUTPUT = path.join(__dirname, '../data/municipality-borders.geojson');
 const BOUNDARY_NAME_FIXES = {
   '高知県::ShimantoCity': '四万十市',
+  '北海道::EsashiCapital': '江差町',
 };
 
 function download(url, outputPath) {
