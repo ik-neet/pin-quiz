@@ -82,11 +82,11 @@ const DIFFICULTY_PRESETS = {
     timeLimit: 0,
     showKana: true,
     showHints: true,
-    hintCount: 5,
+    hintCount: 6,
   },
   intermediate: {
     rounds: 10,
-    timeLimit: 45,
+    timeLimit: 60,
     showKana: true,
     showHints: true,
     hintCount: 3,
