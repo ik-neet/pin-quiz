@@ -296,7 +296,7 @@ function setDifficultySelection(difficulty) {
 function updateRangeDisplays() {
   const rounds = Math.max(1, parseInt(el('setting-rounds').value, 10) || 10);
   const timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
-  const hintCount = Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 3));
+  const hintCount = Math.max(1, Math.min(rounds, parseInt(el('setting-hintcount').value, 10) || 3));
   el('setting-rounds-value').textContent = `${rounds}問`;
   el('setting-timelimit-value').textContent = timeLimit > 0 ? `${timeLimit}秒` : 'なし';
   el('setting-hintcount-value').textContent = `${hintCount}回`;
@@ -304,8 +304,12 @@ function updateRangeDisplays() {
 
 function updateHintSettingsUI() {
   const showHints = el('setting-hints').checked;
+  const rounds = Math.max(1, Math.min(20, parseInt(el('setting-rounds').value, 10) || 10));
   const hintCountRow = el('setting-hintcount-row');
   const hintCountInput = el('setting-hintcount');
+  const nextHintCount = Math.max(1, Math.min(rounds, parseInt(hintCountInput.value, 10) || 3));
+  hintCountInput.max = String(rounds);
+  hintCountInput.value = String(nextHintCount);
   hintCountRow.hidden = !showHints;
   hintCountInput.disabled = !showHints;
 }
@@ -332,7 +336,10 @@ function syncDifficultySelection() {
     timeLimit: Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0)),
     showKana: el('setting-kana').checked,
     showHints: el('setting-hints').checked,
-    hintCount: Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 3)),
+    hintCount: Math.max(1, Math.min(
+      Math.max(1, Math.min(20, parseInt(el('setting-rounds').value, 10) || 10)),
+      parseInt(el('setting-hintcount').value, 10) || 3
+    )),
   };
 
   const matchedDifficulty = Object.entries(DIFFICULTY_PRESETS).find(([, preset]) =>
@@ -379,7 +386,8 @@ function init() {
   ['setting-rounds', 'setting-timelimit', 'setting-hintcount'].forEach(id => {
     el(id).addEventListener('input', updateRangeDisplays);
   });
-  ['setting-timelimit', 'setting-kana', 'setting-hints', 'setting-hintcount'].forEach(id => {
+  el('setting-rounds').addEventListener('input', updateHintSettingsUI);
+  ['setting-rounds', 'setting-timelimit', 'setting-kana', 'setting-hints', 'setting-hintcount'].forEach(id => {
     ['input', 'change'].forEach(eventName => {
       el(id).addEventListener(eventName, syncDifficultySelection);
     });
@@ -394,7 +402,7 @@ function onStartGame() {
   settings.timeLimit = Math.max(0, Math.min(120, parseInt(el('setting-timelimit').value, 10) || 0));
   settings.showKana = el('setting-kana').checked;
   settings.showHints = el('setting-hints').checked;
-  settings.hintCount = Math.max(1, Math.min(5, parseInt(el('setting-hintcount').value, 10) || 3));
+  settings.hintCount = Math.max(1, Math.min(settings.rounds, parseInt(el('setting-hintcount').value, 10) || 3));
   settings.difficulty = selectedDifficulty;
 
   el('start-screen').classList.add('hidden');
