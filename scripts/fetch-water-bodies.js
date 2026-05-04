@@ -9,6 +9,7 @@ const WATER_BODIES = [
   { id: 'lake-biwa', name: '琵琶湖', query: 'Lake Biwa, Japan', kind: 'lake', defaultVisible: true },
   { id: 'lake-kasumigaura', name: '霞ヶ浦', query: 'Lake Kasumigaura, Japan', kind: 'lake', defaultVisible: true },
   { id: 'lake-saroma', name: 'サロマ湖', query: 'Lake Saroma, Japan', kind: 'lake', defaultVisible: true },
+  { id: 'lake-jusan', name: '十三湖', query: '十三湖, Japan', kind: 'lake', defaultVisible: true },
   { id: 'lake-inawashiro', name: '猪苗代湖', query: 'Lake Inawashiro, Japan', kind: 'lake', defaultVisible: true },
   { id: 'lake-nakaumi', name: '中海', query: 'Nakaumi, Japan', kind: 'lake', defaultVisible: true },
   { id: 'lake-shinji', name: '宍道湖', query: 'Lake Shinji, Japan', kind: 'lake', defaultVisible: true },
