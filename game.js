@@ -5,6 +5,8 @@ const JAPAN_ZOOM = 5;
 const PREFECTURE_GEOJSON_URL = './data/prefecture-borders.geojson';
 const JAPAN_MASK_GEOJSON_URL = 'https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson';
 const WATER_BODIES_GEOJSON_URL = './data/water-bodies.geojson';
+const MOBILE_TAP_CONFIRM_DELAY_MS = 300;
+const MOBILE_DOUBLE_TAP_DISTANCE_THRESHOLD = 24;
 const SCORE_BREAKS = [
   [20, 9], [50, 8], [100, 7],
   [200, 5], [400, 3], [700, 1], [Infinity, 0],
@@ -35,6 +37,7 @@ let waterBodiesLayer = null;
 let hintsRemaining = 0;
 let hintUsedThisRound = false;
 let selectedDifficulty = 'beginner';
+let pendingTapPlacement = null;
 
 let settings = {
   rounds: 10,
@@ -465,6 +468,27 @@ function shouldEnableDoubleTapZoom() {
   return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 }
 
+function clearPendingTapPlacement() {
+  if (!pendingTapPlacement) {
+    return;
+  }
+  clearTimeout(pendingTapPlacement.timeoutId);
+  pendingTapPlacement = null;
+}
+
+function placeGuessMarker(lat, lng) {
+  pendingLat = lat;
+  pendingLng = lng;
+
+  if (guessMarker) {
+    map.removeLayer(guessMarker);
+  }
+  guessMarker = L.marker([lat, lng], { icon: pinIcon('pin-guess') }).addTo(map);
+
+  el('confirm-btn').classList.remove('hidden');
+  el('instruction').textContent = 'ピンを動かせます。よければ「ここに決定」を押してください';
+}
+
 function initMap() {
   map = L.map('map', {
     center: JAPAN_CENTER,
@@ -498,6 +522,7 @@ function initMap() {
   map.getPane('selectedHighlightPane').style.pointerEvents = 'none';
 
   map.on('click', onMapClick);
+  map.on('dblclick', onMapDoubleClick);
   el('confirm-btn').addEventListener('click', onConfirm);
   addJapanMask();
   addWaterBodies();
@@ -657,6 +682,7 @@ function shareOnLine() {
 }
 
 function startRound() {
+  clearPendingTapPlacement();
   round += 1;
   answered = false;
   current = queue[round - 1];
@@ -722,6 +748,7 @@ function onTimerExpired() {
   if (answered) {
     return;
   }
+  clearPendingTapPlacement();
   if (pendingLat !== null) {
     revealResult(pendingLat, pendingLng);
   } else {
@@ -735,22 +762,39 @@ function onMapClick(event) {
   }
 
   const { lat, lng } = event.latlng;
-  pendingLat = lat;
-  pendingLng = lng;
+  if (shouldEnableDoubleTapZoom()) {
+    const tappedContainerPoint = event.containerPoint;
+    if (pendingTapPlacement && tappedContainerPoint) {
+      const distance = pendingTapPlacement.containerPoint.distanceTo(tappedContainerPoint);
+      if (distance <= MOBILE_DOUBLE_TAP_DISTANCE_THRESHOLD) {
+        clearPendingTapPlacement();
+        return;
+      }
+    }
 
-  if (guessMarker) {
-    map.removeLayer(guessMarker);
+    clearPendingTapPlacement();
+    pendingTapPlacement = {
+      containerPoint: tappedContainerPoint,
+      timeoutId: window.setTimeout(() => {
+        placeGuessMarker(lat, lng);
+        pendingTapPlacement = null;
+      }, MOBILE_TAP_CONFIRM_DELAY_MS),
+    };
+    return;
   }
-  guessMarker = L.marker([lat, lng], { icon: pinIcon('pin-guess') }).addTo(map);
 
-  el('confirm-btn').classList.remove('hidden');
-  el('instruction').textContent = 'ピンを動かせます。よければ「ここに決定」を押してください';
+  placeGuessMarker(lat, lng);
+}
+
+function onMapDoubleClick() {
+  clearPendingTapPlacement();
 }
 
 function onConfirm() {
   if (answered || pendingLat === null) {
     return;
   }
+  clearPendingTapPlacement();
   el('confirm-btn').classList.add('hidden');
   clearTimer();
   revealResult(pendingLat, pendingLng);
