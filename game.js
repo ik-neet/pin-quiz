@@ -476,6 +476,16 @@ function clearPendingTapPlacement() {
   pendingTapPlacement = null;
 }
 
+function zoomInAroundPoint(event) {
+  const nextZoom = Math.min(map.getZoom() + 1, map.getMaxZoom());
+  if (nextZoom === map.getZoom()) {
+    return;
+  }
+
+  const around = event.containerPoint || event.latlng;
+  map.setZoomAround(around, nextZoom, { animate: true });
+}
+
 function placeGuessMarker(lat, lng) {
   pendingLat = lat;
   pendingLng = lng;
@@ -494,9 +504,10 @@ function initMap() {
     center: JAPAN_CENTER,
     zoom: JAPAN_ZOOM,
     minZoom: JAPAN_ZOOM,
+    maxZoom: 9,
     maxBounds: [[22, 120], [47, 150]],
     maxBoundsViscosity: 1.0,
-    doubleClickZoom: shouldEnableDoubleTapZoom(),
+    doubleClickZoom: !shouldEnableDoubleTapZoom(),
   });
 
   map.createPane('municipalityPane');
@@ -522,7 +533,6 @@ function initMap() {
   map.getPane('selectedHighlightPane').style.pointerEvents = 'none';
 
   map.on('click', onMapClick);
-  map.on('dblclick', onMapDoubleClick);
   el('confirm-btn').addEventListener('click', onConfirm);
   addJapanMask();
   addWaterBodies();
@@ -768,6 +778,7 @@ function onMapClick(event) {
       const distance = pendingTapPlacement.containerPoint.distanceTo(tappedContainerPoint);
       if (distance <= MOBILE_DOUBLE_TAP_DISTANCE_THRESHOLD) {
         clearPendingTapPlacement();
+        zoomInAroundPoint(event);
         return;
       }
     }
@@ -784,10 +795,6 @@ function onMapClick(event) {
   }
 
   placeGuessMarker(lat, lng);
-}
-
-function onMapDoubleClick() {
-  clearPendingTapPlacement();
 }
 
 function onConfirm() {
