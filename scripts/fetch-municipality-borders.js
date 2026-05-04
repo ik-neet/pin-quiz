@@ -7,8 +7,17 @@ const path = require('path');
 const DOWNLOAD_URL = 'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_JPN_2.json';
 const OUTPUT = path.join(__dirname, '../data/municipality-borders.geojson');
 const BOUNDARY_NAME_FIXES = {
-  '高知県::ShimantoCity': '四万十市',
   '北海道::EsashiCapital': '江差町',
+  '北海道::KushiroCity': '釧路市',
+  '北海道::Shibetsu': '標津町',
+  '北海道::Shiraoi': '白老町',
+  '福井県::Echizen': '越前町',
+  '岐阜県::Shirakawa': '白川町',
+  '広島県::Fuchū': '府中町',
+  '高知県::ShimantoCity': '四万十市',
+  '高知県::TosaCity': '土佐市',
+  '長野県::KisoVillage': '木祖村',
+  '埼玉県::MisatoCity': '三郷市',
 };
 
 function download(url, outputPath) {

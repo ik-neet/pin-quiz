@@ -58,8 +58,17 @@ const DIFFICULTY_LABELS = {
 };
 
 const BOUNDARY_NAME_FIXES = {
-  '高知県::ShimantoCity': '四万十市',
   '北海道::EsashiCapital': '江差町',
+  '北海道::KushiroCity': '釧路市',
+  '北海道::Shibetsu': '標津町',
+  '北海道::Shiraoi': '白老町',
+  '福井県::Echizen': '越前町',
+  '岐阜県::Shirakawa': '白川町',
+  '広島県::Fuchū': '府中町',
+  '高知県::ShimantoCity': '四万十市',
+  '高知県::TosaCity': '土佐市',
+  '長野県::KisoVillage': '木祖村',
+  '埼玉県::MisatoCity': '三郷市',
 };
 const DIFFICULTY_PRESETS = {
   beginner: {
@@ -185,9 +194,16 @@ function getBoundaryFeatureForMunicipality(municipality) {
   }
 
   const exactKey = createMunicipalityKey(municipality.prefecture, municipality.name);
-  const exactFeature = boundaryIndex[exactKey];
-  if (exactFeature) {
-    return exactFeature;
+  const exactMatch = boundaryIndex[exactKey];
+  if (exactMatch) {
+    const exactFeatures = Array.isArray(exactMatch) ? exactMatch : [exactMatch];
+    const exactContainingFeature = exactFeatures.find(feature =>
+      pointInFeature([municipality.lng, municipality.lat], feature)
+    );
+    if (exactContainingFeature) {
+      return exactContainingFeature;
+    }
+    return exactFeatures[0];
   }
 
   const samePrefectureFeatures = boundaryFeatures.filter(feature =>
@@ -367,7 +383,15 @@ async function loadBoundaryData() {
       const prefecture = feature.properties.NL_NAME_1 || feature.properties.NAME_1;
       const name = feature.properties.NL_NAME_2 || feature.properties.NAME_2;
       if (prefecture && name) {
-        boundaryIndex[createMunicipalityKey(prefecture, name)] = feature;
+        const key = createMunicipalityKey(prefecture, name);
+        const existing = boundaryIndex[key];
+        if (!existing) {
+          boundaryIndex[key] = feature;
+        } else if (Array.isArray(existing)) {
+          existing.push(feature);
+        } else {
+          boundaryIndex[key] = [existing, feature];
+        }
       }
     }
   } catch {
