@@ -38,6 +38,7 @@ let hintsRemaining = 0;
 let hintUsedThisRound = false;
 let selectedDifficulty = 'beginner';
 let pendingTapPlacement = null;
+let roundResults = [];
 
 let settings = {
   rounds: 10,
@@ -161,6 +162,27 @@ function formatResultEntityLabel(label, prefecture, municipalityHtml) {
 
 function formatMapMunicipalityLabel(label, prefecture, municipalityHtml) {
   return `<span class="map-entity"><span class="map-entity-badge">${escapeHtml(label)}</span><span class="map-entity-body">${escapeHtml(prefecture)} ${municipalityHtml}</span></span>`;
+}
+
+function formatRoundResultText(result) {
+  const selectedLabel = result.isTimeout
+    ? '時間切れ'
+    : result.guessedFeatureLabel || '市町村境界の外';
+  return `
+    <div class="round-result-item">
+      <div class="round-result-meta">
+        <span class="round-result-number">第${result.round}問</span>
+        <span class="round-result-points" data-level="${escapeHtml(result.pointsLevel)}">+${escapeHtml(result.points)}pt</span>
+      </div>
+      <div class="round-result-answer">${escapeHtml(result.answerLabel)}</div>
+      <div class="round-result-selection">選択: ${escapeHtml(selectedLabel)}</div>
+    </div>
+  `;
+}
+
+function renderRoundResults() {
+  const container = el('round-results');
+  container.innerHTML = roundResults.map(formatRoundResultText).join('');
 }
 
 function createMunicipalityKey(prefecture, name) {
@@ -649,6 +671,7 @@ function startNewGame() {
   totalScore = 0;
   answered = false;
   hintsRemaining = settings.showHints ? settings.hintCount : 0;
+  roundResults = [];
   queue = shuffle([...municipalities]).slice(0, settings.rounds);
 
   el('total-rounds').textContent = settings.rounds;
@@ -868,6 +891,7 @@ function revealResult(guessLat, guessLng) {
   const answerFeature = boundaryIndex ? getBoundaryFeatureForMunicipality(current) : null;
   const guessedName = guessedFeature?.properties?.NL_NAME_2 || guessedFeature?.properties?.NAME_2 || '';
   const guessedPrefecture = guessedFeature?.properties?.NL_NAME_1 || guessedFeature?.properties?.NAME_1 || '';
+  const guessedFeatureLabel = guessedFeature ? formatFeatureMunicipalityLabel(guessedFeature) : '';
 
   if (isTimeout) {
     el('result-guess').textContent = '時間切れ';
@@ -964,7 +988,17 @@ function revealResult(guessLat, guessLng) {
     formatMunicipalityName(current.name, current.nameKana, false)
   );
   el('result-points').textContent = `+${pts}`;
-  el('result-points').dataset.level = pts >= 8 ? 'high' : pts >= 5 ? 'mid' : pts >= 1 ? 'low' : 'zero';
+  const pointsLevel = pts >= 8 ? 'high' : pts >= 5 ? 'mid' : pts >= 1 ? 'low' : 'zero';
+  el('result-points').dataset.level = pointsLevel;
+
+  roundResults.push({
+    round,
+    points: pts,
+    pointsLevel,
+    isTimeout,
+    answerLabel: `${current.prefecture} ${current.name}`,
+    guessedFeatureLabel,
+  });
 
   const isLast = round >= settings.rounds;
   el('next-btn').textContent = isLast ? '結果を見る →' : '次の問題へ →';
@@ -990,6 +1024,7 @@ function showGameOver() {
   el('final-msg').textContent = message;
   el('final-score').textContent = `${totalScore} / ${max}`;
   el('final-difficulty').textContent = `難易度: ${getDifficultyLabel()}`;
+  renderRoundResults();
   el('share-x-btn').onclick = shareOnX;
   el('share-line-btn').onclick = shareOnLine;
   el('back-to-settings-btn').onclick = returnToSettings;

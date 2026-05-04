@@ -603,8 +603,10 @@ body {
   padding: 44px 60px;
   text-align: center;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
-  max-width: 420px;
+  max-width: 520px;
   width: 90%;
+  max-height: min(80vh, 820px);
+  overflow-y: auto;
 }
 
 #final-msg {
@@ -625,8 +627,58 @@ body {
   font-size: 15px;
   color: #62708a;
   margin-top: 10px;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
   font-weight: 700;
+}
+
+.round-results {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.round-result-item {
+  padding: 12px 14px;
+  border: 1px solid #d7ddea;
+  border-radius: 14px;
+  background: #f8faff;
+}
+
+.round-result-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.round-result-number {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--bg-accent);
+}
+
+.round-result-points {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.round-result-points[data-level="high"]  { color: var(--success); }
+.round-result-points[data-level="mid"]   { color: #e67e22; }
+.round-result-points[data-level="low"]   { color: var(--danger); }
+.round-result-points[data-level="zero"]  { color: #aaa; }
+
+.round-result-answer {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.round-result-selection {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #62708a;
 }
 
 .share-actions {
@@ -921,6 +973,11 @@ body {
 
   .share-actions {
     grid-template-columns: 1fr;
+  }
+
+  #game-over-card {
+    padding: 28px 18px;
+    max-height: calc(100dvh - 32px);
   }
 
   #hint-btn {
