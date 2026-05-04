@@ -10,8 +10,8 @@ const MOBILE_DOUBLE_TAP_DISTANCE_THRESHOLD = 24;
 const RESULT_REVEAL_MAX_ZOOM = 10;
 const PREFECTURE_HINT_MIN_ZOOM = 8;
 const SCORE_BREAKS = [
-  [20, 9], [50, 8], [100, 7],
-  [200, 5], [400, 3], [700, 1], [Infinity, 0],
+  [20, 9], [40, 8], [70, 7], [100, 6],
+  [150, 5], [220, 4], [300, 3], [400, 2], [500, 1], [Infinity, 0],
 ];
 const WATER_BODY_VISIBILITY_OVERRIDES = {};
 
@@ -1072,9 +1072,17 @@ function calcPoints(distKm, guessLat, guessLng) {
     }
   }
 
+  const guessedMunicipalityFeature = findMunicipalityFeatureAt(guessLng, guessLat);
+  const guessedPrefectureFeature = guessedMunicipalityFeature || findPrefectureFeatureAt(guessLng, guessLat);
+  const guessedPrefecture = normalizePrefectureName(getFeaturePrefecture(guessedPrefectureFeature));
+  const answerPrefecture = normalizePrefectureName(current?.prefecture || '');
+
   for (const [maxDist, pts] of SCORE_BREAKS) {
     if (distKm <= maxDist) {
-      return { pts, inBoundary: false };
+      const adjustedPoints = guessedPrefecture && guessedPrefecture === answerPrefecture
+        ? Math.max(5, pts)
+        : pts;
+      return { pts: adjustedPoints, inBoundary: false };
     }
   }
 
@@ -1084,6 +1092,11 @@ function calcPoints(distKm, guessLat, guessLng) {
 function findMunicipalityAt(lng, lat) {
   const feature = findMunicipalityFeatureAt(lng, lat);
   return feature ? formatFeatureMunicipalityLabel(feature) : null;
+}
+
+function findPrefectureFeatureAt(lng, lat) {
+  const features = prefectureGeojson?.features || [];
+  return features.find(feature => pointInFeature([lng, lat], feature)) || null;
 }
 
 function pointInFeature(point, feature) {
