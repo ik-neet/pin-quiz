@@ -740,6 +740,9 @@ function startRound() {
   pendingLat = null;
   pendingLng = null;
   el('result-panel').classList.add('hidden');
+  el('result-panel').dataset.hit = 'normal';
+  el('result-distance').removeAttribute('data-hit');
+  el('result-points').removeAttribute('data-hit');
   el('confirm-btn').classList.add('hidden');
   updateHintButton();
   el('instruction').textContent = '地図をクリックしてピンを置いてください';
@@ -892,10 +895,12 @@ function revealResult(guessLat, guessLng) {
   let dist = 0;
   let pts = 0;
   let inBoundary = false;
+  let isPerfectHit = false;
 
   if (!isTimeout) {
     dist = haversine(guessLat, guessLng, current.lat, current.lng);
     ({ pts, inBoundary } = calcPoints(dist, guessLat, guessLng));
+    isPerfectHit = inBoundary;
   }
 
   totalScore += pts;
@@ -967,6 +972,10 @@ function revealResult(guessLat, guessLng) {
     )
     .openTooltip();
 
+  if (isPerfectHit) {
+    answerMarker.getElement()?.querySelector('.pin-answer')?.classList.add('pin-answer-perfect');
+  }
+
   if (!isTimeout && !inBoundary) {
     connLine = L.polyline(
       [[guessLat, guessLng], [current.lat, current.lng]],
@@ -986,7 +995,7 @@ function revealResult(guessLat, guessLng) {
   if (isTimeout) {
     el('result-distance').textContent = '時間切れ';
   } else if (inBoundary) {
-    el('result-distance').textContent = '市町村内ヒット';
+    el('result-distance').textContent = isPerfectHit ? 'パーフェクトヒット！' : '市町村内ヒット';
   } else {
     const distLabel = dist < 1
       ? `${Math.round(dist * 1000)} m`
@@ -1002,6 +1011,9 @@ function revealResult(guessLat, guessLng) {
   el('result-points').textContent = `+${pts}`;
   const pointsLevel = pts >= 8 ? 'high' : pts >= 5 ? 'mid' : pts >= 1 ? 'low' : 'zero';
   el('result-points').dataset.level = pointsLevel;
+  el('result-panel').dataset.hit = isPerfectHit ? 'perfect' : 'normal';
+  el('result-distance').dataset.hit = isPerfectHit ? 'perfect' : 'normal';
+  el('result-points').dataset.hit = isPerfectHit ? 'perfect' : 'normal';
 
   roundResults.push({
     round,

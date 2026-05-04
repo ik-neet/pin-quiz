@@ -430,6 +430,22 @@ body {
   50% { opacity: 0.35; }
 }
 
+@keyframes perfectHitGlow {
+  0%, 100% { box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25); }
+  50% { box-shadow: 0 -8px 34px rgba(255, 196, 0, 0.48); }
+}
+
+@keyframes perfectHitPop {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.14); }
+  70% { transform: scale(0.96); }
+}
+
+@keyframes perfectPinPulse {
+  0%, 100% { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 215, 0, 0.22), 0 8px 18px rgba(39, 174, 96, 0.45); }
+}
+
 #map-container {
   flex: 1;
   position: relative;
@@ -477,6 +493,12 @@ body {
   transform: translateY(110%);
 }
 
+#result-panel[data-hit="perfect"] {
+  border-top-color: #f1c40f;
+  background: linear-gradient(180deg, #fffef4 0%, #ffffff 100%);
+  animation: perfectHitGlow 0.9s ease-in-out 2;
+}
+
 #result-left {
   flex: 1;
 }
@@ -485,6 +507,11 @@ body {
   font-size: 20px;
   font-weight: 700;
   color: #222;
+}
+
+#result-distance[data-hit="perfect"] {
+  color: #b7791f;
+  letter-spacing: 0.04em;
 }
 
 #result-guess {
@@ -568,6 +595,12 @@ body {
 #result-points[data-level="mid"]   { color: #e67e22; }
 #result-points[data-level="low"]   { color: var(--danger); }
 #result-points[data-level="zero"]  { color: #aaa; }
+
+#result-points[data-hit="perfect"] {
+  color: #f1c40f;
+  text-shadow: 0 0 18px rgba(241, 196, 15, 0.32);
+  animation: perfectHitPop 0.7s ease-out 2;
+}
 
 #next-btn {
   background: var(--bg-deep);
@@ -827,6 +860,11 @@ body {
 
 .pin-guess  { background: var(--danger); }
 .pin-answer { background: var(--success); }
+
+.pin-answer-perfect {
+  border-color: rgba(255, 244, 184, 0.96);
+  animation: perfectPinPulse 0.85s ease-in-out 3;
+}
 
 .map-municipality-tooltip {
   border: none;
