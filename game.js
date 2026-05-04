@@ -5,7 +5,7 @@ const JAPAN_ZOOM = 5;
 const PREFECTURE_GEOJSON_URL = './data/prefecture-borders.geojson';
 const JAPAN_MASK_GEOJSON_URL = 'https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson';
 const WATER_BODIES_GEOJSON_URL = './data/water-bodies.geojson';
-const MOBILE_TAP_CONFIRM_DELAY_MS = 300;
+const MOBILE_TAP_CONFIRM_DELAY_MS = 200;
 const MOBILE_DOUBLE_TAP_DISTANCE_THRESHOLD = 24;
 const SCORE_BREAKS = [
   [20, 9], [50, 8], [100, 7],
