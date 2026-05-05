@@ -695,15 +695,15 @@ body {
 .round-results {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 18px;
+  gap: 12px;
+  margin-top: 20px;
   text-align: left;
 }
 
 .round-result-item {
-  padding: 10px 11px;
+  padding: 14px 15px;
   border: 1px solid #d7ddea;
-  border-radius: 12px;
+  border-radius: 14px;
   background: #f8faff;
 }
 
@@ -712,17 +712,17 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .round-result-number {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--bg-accent);
 }
 
 .round-result-points {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
 }
 
@@ -732,16 +732,16 @@ body {
 .round-result-points[data-level="zero"]  { color: #aaa; }
 
 .round-result-answer {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-main);
-  line-height: 1.35;
+  line-height: 1.45;
 }
 
 .round-result-selection {
-  margin-top: 3px;
-  font-size: 12px;
-  line-height: 1.35;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.45;
   color: #62708a;
 }
 

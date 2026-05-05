@@ -1047,6 +1047,9 @@ function revealResult(guessLat, guessLng) {
 
 function showGameOver() {
   el('result-panel').classList.add('hidden');
+  el('municipality-name').textContent = '';
+  el('prefecture-hint').textContent = '';
+  el('instruction').textContent = '';
 
   const max = settings.rounds * 10;
   const messages = [
