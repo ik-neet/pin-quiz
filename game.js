@@ -688,6 +688,7 @@ function startNewGame() {
   el('total-rounds').textContent = settings.rounds;
   el('total-score').textContent = '0';
   el('game-over').classList.add('hidden');
+  el('game-over').scrollTop = 0;
 
   startRound();
 }
@@ -695,6 +696,7 @@ function startNewGame() {
 function returnToSettings() {
   clearTimer();
   el('game-over').classList.add('hidden');
+  el('game-over').scrollTop = 0;
   el('start-screen').classList.remove('hidden');
 }
 
@@ -1064,6 +1066,7 @@ function showGameOver() {
   el('share-line-btn').onclick = shareOnLine;
   el('back-to-settings-btn').onclick = returnToSettings;
   el('restart-btn').onclick = startNewGame;
+  el('game-over').scrollTop = 0;
   el('game-over').classList.remove('hidden');
 }
 
