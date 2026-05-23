@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>日本市区町村 位置当てゲーム</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,7 +12,6 @@
   <div id="start-screen">
     <div id="start-card">
       <div id="start-title-wrap">
-        <div id="start-title-badge">JAPAN MUNICIPALITY PIN QUIZ</div>
         <h1 id="start-title">日本市区町村 位置当てゲーム</h1>
         <p id="start-subtitle">地図をクリックして、全国の市区町村の位置感覚に挑戦。</p>
       </div>
@@ -82,6 +82,11 @@
 
       <button id="start-btn" disabled>読み込み中...</button>
     </div>
+    <footer class="site-footer" aria-label="サイト情報">
+      <a class="site-footer-link" href="https://ik-neet.com" target="_blank" rel="noopener" aria-label="ik-neet.com を開く">
+        <img src="assets/ik-neet-logo.svg" alt="ik-neet.com">
+      </a>
+    </footer>
   </div>
 
   <div id="header">
@@ -132,6 +137,11 @@
         <button id="back-to-settings-btn" class="secondary-action">ルール設定に戻る</button>
         <button id="restart-btn">もう一度プレイ</button>
         <div id="round-results" class="round-results" aria-label="各ラウンドの結果"></div>
+        <footer class="site-footer site-footer-gameover" aria-label="サイト情報">
+          <a class="site-footer-link" href="https://ik-neet.com" target="_blank" rel="noopener" aria-label="ik-neet.com を開く">
+            <img src="assets/ik-neet-logo.svg" alt="ik-neet.com">
+          </a>
+        </footer>
       </div>
     </div>
   </div>

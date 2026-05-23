@@ -35,6 +35,7 @@ body {
     radial-gradient(circle at top, rgba(129, 156, 255, 0.16), transparent 28%),
     linear-gradient(180deg, #11172d 0%, var(--bg-deep) 52%, #101624 100%);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 9999;
@@ -61,18 +62,6 @@ body {
 
 #start-title-wrap {
   margin-bottom: 24px;
-}
-
-#start-title-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(40, 52, 95, 0.09);
-  color: var(--bg-accent);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  margin-bottom: 14px;
 }
 
 #start-title {
@@ -332,6 +321,36 @@ body {
 #start-btn:hover:not(:disabled) { filter: brightness(1.06); }
 #start-btn:active:not(:disabled) { transform: scale(0.98); }
 #start-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.site-footer {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.site-footer-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  opacity: 0.72;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.site-footer-link:hover,
+.site-footer-link:focus-visible {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.64);
+  outline: none;
+}
+
+.site-footer img {
+  display: block;
+  width: 118px;
+  height: auto;
+}
 
 #header {
   background: var(--bg-deep);
@@ -812,6 +831,15 @@ body {
 
 #restart-btn:hover  { background: #2d2d5e; }
 #restart-btn:active { transform: scale(0.97); }
+
+.site-footer-gameover {
+  margin-top: 22px;
+}
+
+.site-footer-gameover .site-footer-link:hover,
+.site-footer-gameover .site-footer-link:focus-visible {
+  background: rgba(40, 52, 95, 0.08);
+}
 
 #confirm-btn {
   position: absolute;
